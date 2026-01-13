@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Almacén</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            color: #667eea;
+            font-size: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        nav {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        nav a:hover, nav a.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: #667eea;
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #6b7280;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .close-modal:hover {
+            color: #ef4444;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .loader {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #scanner-video {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            background: #000;
+        }
+
+        .scanner-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #10b981;
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0%, 100% { top: 20%; }
+            50% { top: 80%; }
+        }
+
+        #canvas3d {
+            width: 100%;
+            height: 600px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
+            cursor: grab;
+        }
+
+        #canvas3d:active {
+            cursor: grabbing;
+        }
+
+        .controls-3d {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .zona-button {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .zona-button:hover, .zona-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ======================== LOGIN PAGE ======================== -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="login-card">
+                <h1 style="color: #667eea; text-align: center; margin-bottom: 30px;">🏭 Sistema de Almacén</h1>
+                <div id="loginAlert"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" required placeholder="usuario@almacen.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Iniciar Sesión
+                    </button>
+                </form>
+                
+                <div style="margin-top: 20px; text-align: center; color: #6b7280; font-size: 14px;">
+                    <p>Usuario por defecto:</p>
+                    <p><strong>admin@almacen.com</strong></p>
+                    <p>Contraseña: <strong>admin123</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================== MAIN APP ======================== -->
+    <div id="mainApp" class="page">
+        <div class="container">
+            <header>
+                <h1 id="pageTitle">🏭 Sistema de Almacén</h1>
+                <div class="user-info">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="btn btn-secondary">Cerrar Sesión</button>
+                </div>
+            </header>
+
+            <nav>
+                <ul>
+                    <li><a onclick="showSection('dashboard')" id="navDashboard">Dashboard</a></li>
+                    <li><a onclick="showSection('inventario')" id="navInventario">Inventario</a></li>
+                    <li><a onclick="showSection('movimientos')" id="navMovimientos">Movimientos</a></li>
+                    <li><a onclick="showSection('almacen3d')" id="navAlmacen3d">Vista 3D</a></li>
+                    <li><a onclick="showSection('scanner')" id="navScanner">Escáner</a></li>
+                    <li><a onclick="showSection('reportes')" id="navReportes">Reportes</a></li>
+                </ul>
+            </nav>
+
+            <!-- ======================== DASHBOARD SECTION ======================== -->
+            <div id="dashboardSection" class="section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Productos</h3>
+                        <div class="stat-value" id="totalProductos">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ubicaciones Ocupadas</h3>
+                        <div class="stat-value" id="ubicacionesOcupadas">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Movimientos Hoy</h3>
+                        <div class="stat-value" id="movimientosHoy">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Stock Total (kg)</h3>
+                        <div class="stat-value" id="stockTotal">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Últimos Movimientos</h2>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Producto</th>
+                                    <th>Lote</th>
+                                    <th>Cantidad</th>
+                                    <th>Ubicación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ultimosMovimientos">
+                                <tr><td colspan="6" style="text-align: center;">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Distribución por Zona</h2>
+                    <div id="distribucionZonas"></div>
+                </div>
+            </div>
+
+            <!-- ======================== INVENTARIO SECTION ======================== -->
+            <div id="inventarioSection" class="section" style="display: none;">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h2>Productos en Inventario</h2>
+                        <button id="btnNuevoProducto" class="btn btn-primary" style="display: none;">+ Nuevo Producto</button>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <input type="text" id="buscarProducto" placeholder="Buscar por código, descripción o lote..." 
+                               style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px;">
+                    </div>
+
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <select id="filtroZona" style="padding: 10px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                            <option value="">Todas las zonas</option>
+                            <option value="A">Zona A (Granel)</option>
+                            <option value="B">Zona B (Granel)</option>
+                            <option value="C">Zona C (Granel)</option>
+                            <option value="D">Zona D (IBC)</option>
+                            <option value="E">Zona E (IBC)</option>
+                            <option value="F">Zona F (IBC)</option>
+                            <option value="G">Zona G (IBC)</option>
+                            <option value="H">Zona H (IBC)</option>
+                        </select>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Descripción</th>
+                                    <th>Lote</th>
+                                    <th>Ubicación</th>
+                                    <th>Cantidad</th>
+                                    <th>Tipo</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th>Código de Barras</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaInventario">
+                                <tr><td colspan="8" style="text-align: center;"><div class="loader"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== MOVIMIENTOS SECTION ======================== -->
+            <div id="movimientosSection" class="section" style="display: none;">
+                <div class="card" id="seccionRegistro" style="display: none;">
+                    <h2>Registrar Movimiento</h2>
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="mostrarFormularioMov('manual')">Manual</button>
+                        <button class="btn btn-success" onclick="mostrarFormularioMov('excel')">Cargar Excel</button>
+                    </div>
+
+                    <div id="formManual" style="display: none;">
+                        <form id="formMovimiento">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                <div class="form-group">
+                                    <label>Tipo de Movimiento:</label>
+                                    <select id="tipoMovimiento" required>
+                                        <option value="entrada">Entrada</option>
+                                        <option value="salida">Salida</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Producto:</label>
+                                    <select id="productoId" required>
+                                        <option value="">Seleccionar...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ubicación:</label>
+                                    <select id="ubicacionId" required>
+                                        <option value="">Seleccionar...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lote:</label>
+                                    <input type="text" id="lote" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Cantidad:</label>
+                                    <input type="number" id="cantidad" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Unidad:</label>
+                                    <select id="unidad" required>
+                                        <option value="kg">Kilogramos (kg)</option>
+                                        <option value="ton">Toneladas (ton)</option>
+                                        <option value="lt">Litros (lt)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Observaciones:</label>
+                                <textarea id="observaciones" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Registrar Movimiento</button>
+                        </form>
+                    </div>
+
+                    <div id="formExcel" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>Formato del Excel:</strong> El archivo debe tener las columnas:
+                            tipo | codigo_producto | codigo_ubicacion | lote | cantidad | unidad | observaciones
+                        </div>
+                        <div class="form-group">
+                            <label>Cargar archivo Excel:</label>
+                            <input type="file" id="archivoExcel" accept=".xlsx,.xls,.csv">
+                        </div>
+                        <button class="btn btn-success" onclick="procesarExcel()">Procesar Excel</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Historial de Movimientos</h2>
+                    
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <input type="date" id="fechaDesde" style="padding: 10px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                        <input type="date" id="fechaHasta" style="padding: 10px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                        <select id="filtroTipo" style="padding: 10px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                            <option value="">Todos</option>
+                            <option value="entrada">Entradas</option>
+                            <option value="salida">Salidas</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="filtrarMovimientos()">Filtrar</button>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha/Hora</th>
+                                    <th>Tipo</th>
+                                    <th>Producto</th>
+                                    <th>Lote</th>
+                                    <th>Cantidad</th>
+                                    <th>Ubicación</th>
+                                    <th>Usuario</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaMovimientos">
+                                <tr><td colspan="8" style="text-align: center;"><div class="loader"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== SCANNER SECTION ======================== -->
+            <div id="scannerSection" class="section" style="display: none;">
+                <div class="card">
+                    <h2>Escanear Código de Barras</h2>
+                    
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <button id="btnIniciarScanner" class="btn btn-primary">Iniciar Escáner</button>
+                        <button id="btnDetenerScanner" class="btn btn-danger" style="display: none;">Detener Escáner</button>
+                    </div>
+
+                    <div id="scanner-container" style="text-align: center; margin-bottom: 20px;">
+                        <div class="scanner-container">
+                            <video id="scanner-video" autoplay playsinline></video>
+                            <div class="scanner-line" id="scannerLine" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info" style="margin-bottom: 20px;">
+                        <strong>Instrucciones:</strong> Apunta la cámara hacia el código de barras del producto. 
+                        El sistema lo detectará automáticamente y mostrará la información.
+                    </div>
+
+                    <div id="resultadoScanner"></div>
+                </div>
+
+                <div id="infoProducto" class="card" style="display: none;">
+                    <h2>Información del Producto</h2>
+                    <div id="detalleProducto"></div>
+                </div>
+            </div>
+
+            <!-- ======================== ALMACEN 3D SECTION ======================== -->
+            <div id="almacen3dSection" class="section" style="display: none;">
+                <div class="card">
+                    <h2>Navegación 3D del Almacén</h2>
+                    
+                    <div class="alert alert-info" style="margin-bottom: 20px;">
+                        <strong>Controles:</strong> Arrastra para rotar • Scroll para zoom • Click en las zonas para ver detalles
+                    </div>
+
+                    <div class="controls-3d">
+                        <button class="zona-button" onclick="enfocarZona('A')">Zona A</button>
+                        <button class="zona-button" onclick="enfocarZona('B')">Zona B</button>
+                        <button class="zona-button" onclick="enfocarZona('C')">Zona C</button>
+                        <button class="zona-button" onclick="enfocarZona('D')">Zona D</button>
+                        <button class="zona-button" onclick="enfocarZona('E')">Zona E</button>
+                        <button class="zona-button" onclick="enfocarZona('F')">Zona F</button>
+                        <button class="zona-button" onclick="enfocarZona('G')">Zona G</button>
+                        <button class="zona-button" onclick="enfocarZona('H')">Zona H</button>
+                        <button class="btn btn-secondary" onclick="resetearVista()">Resetear Vista</button>
+                    </div>
+
+                    <canvas id="canvas3d"></canvas>
+
+                    <div style="margin-top: 20px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: #10b981; border-radius: 5px;"></div>
+                            <span>Ocupada</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: #ef4444; border-radius: 5px;"></div>
+                            <span>Vacía</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: #f59e0b; border-radius: 5px;"></div>
+                            <span>Granel (A, B, C)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: #3b82f6; border-radius: 5px;"></div>
+                            <span>IBC (D-H)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="detalleZona" class="card" style="display: none;">
+                    <h2>Detalle de Zona <span id="zonaSeleccionada"></span></h2>
+                    <div id="listaUbicaciones"></div>
+                </div>
+            </div>
+
+            <!-- ======================== REPORTES SECTION ======================== -->
+            <div id="reportesSection" class="section" style="display: none;">
+                <div class="card">
+                    <h2>Generar Reportes</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div style="border: 2px solid #e5e7eb; padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #667eea; margin-bottom: 15px;">📋 Catálogo de Productos</h3>
+                            <p style="color: #6b7280; margin-bottom: 15px;">Lista completa de productos con códigos</p>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-danger" onclick="generarReportePDF('productos')">PDF</button>
+                                <button class="btn btn-success" onclick="generarReporteExcel('productos')">Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================== MODALS ======================== -->
+    <div id="modalProducto" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nuevo Producto</h2>
+                <span class="close-modal" onclick="cerrarModal()">&times;</span>
+            </div>
+            <form id="formProducto">
+                <div class="form-group">
+                    <label>Código del Producto:</label>
+                    <input type="text" id="codigoProducto" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <textarea id="descripcionProducto" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tipo:</label>
+                    <select id="tipoProducto" required>
+                        <option value="granel">Granel (Zonas A, B, C)</option>
+                        <option value="ibc">IBC (Zonas D, E, F, G, H)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================== CDN LIBRARIES ======================== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // Envolver todo en una función auto-ejecutable para evitar conflictos globales
+        (function() {
+            'use strict';
+            
+            // ======================== CONFIGURACIÓN Y VARIABLES GLOBALES ========================
+            
+            // ⚠️ IMPORTANTE: REEMPLAZA ESTAS CREDENCIALES CON LAS TUYAS
+            var SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+            var SUPABASE_ANON_KEY = 'TU-CLAVE-ANON-AQUI';
+            
+            // Variable global para Supabase (se inicializa después de cargar la librería)
+            var supabase = null;
+            
+            // Variables globales de la aplicación
+            var currentUser = null;
+            var inventarioCompleto = [];
+            var scene, camera, renderer, raycaster, mouse, zonasMeshes = [];
+            var codeReader = null;
+            var scannerActivo = false;
+            
+            // Inicializar Supabase cuando las librerías estén cargadas
+            function initSupabase() {
+                try {
+                    if (typeof window.supabase !== 'undefined') {
+                        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                        console.log('Supabase inicializado correctamente');
+                        return true;
+                    } else {
+                        console.error('La librería de Supabase no se cargó');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error al inicializar Supabase:', error);
+                    alert('Error de configuración. Por favor verifica tus credenciales de Supabase.');
+                    return false;
+                }
+            }
+
+        // ======================== AUTENTICACIÓN ========================
+        function loadCurrentUser() {
+            const userData = localStorage.getItem('currentUser');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+            }
+            return currentUser;
+        }
+
+        function saveCurrentUser(user) {
+            currentUser = user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            location.reload();
+        }
+
+        function checkAuth() {
+            loadCurrentUser();
+            if (!currentUser) {
+                document.getElementById('loginPage').classList.add('active');
+                document.getElementById('mainApp').classList.remove('active');
+                return false;
+            }
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('mainApp').classList.add('active');
+            document.getElementById('userName').textContent = currentUser.nombre + ' (' + currentUser.rol + ')';
+            
+            if (canEdit()) {
+                document.getElementById('btnNuevoProducto').style.display = 'inline-block';
+                document.getElementById('seccionRegistro').style.display = 'block';
+            }
+            
+            return true;
+        }
+
+        function canEdit() {
+            return currentUser && (currentUser.rol === 'jefe' || currentUser.rol === 'asistente');
+        }
+
+        // Login handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const { data: usuarios, error } = await supabase
+                    .from('usuarios')
+                    .select('*')
+                    .eq('email', email)
+                    .single();
+                
+                if (error || !usuarios) {
+                    showAlert('Usuario no encontrado', 'error', 'loginAlert');
+                    return;
+                }
+                
+                if (password === 'admin123' || password === '123456') {
+                    saveCurrentUser(usuarios);
+                    showAlert('Inicio de sesión exitoso', 'success', 'loginAlert');
+                    setTimeout(() => {
+                        checkAuth();
+                        showSection('dashboard');
+                    }, 1000);
+                } else {
+                    showAlert('Contraseña incorrecta', 'error', 'loginAlert');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al iniciar sesión', 'error', 'loginAlert');
+            }
+        });
+
+        function showAlert(message, type = 'info', containerId = 'loginAlert') {
+            const alertContainer = document.getElementById(containerId);
+            if (!alertContainer) return;
+            
+            const alertClass = `alert-${type}`;
+            alertContainer.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+            
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 3000);
+        }
+
+        // ======================== NAVEGACIÓN ========================
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            
+            document.getElementById(section + 'Section').style.display = 'block';
+            document.getElementById('nav' + section.charAt(0).toUpperCase() + section.slice(1)).classList.add('active');
+            
+            const titles = {
+                dashboard: '📊 Dashboard',
+                inventario: '📦 Inventario',
+                movimientos: '📊 Movimientos',
+                scanner: '📱 Escáner',
+                almacen3d: '🏭 Vista 3D',
+                reportes: '📄 Reportes'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[section] || 'Sistema de Almacén';
+            
+            if (section === 'dashboard') cargarDashboard();
+            if (section === 'inventario') cargarInventario();
+            if (section === 'movimientos') cargarMovimientos();
+            if (section === 'almacen3d') inicializarAlmacen3D();
+            if (section === 'reportes') inicializarReportes();
+        }
+
+        // ======================== DASHBOARD ========================
+        async function cargarDashboard() {
+            try {
+                const { data: productos } = await supabase.from('productos').select('id');
+                document.getElementById('totalProductos').textContent = productos?.length || 0;
+
+                const { data: inventario } = await supabase.from('inventario').select('ubicacion_id');
+                const ubicacionesUnicas = new Set(inventario?.map(i => i.ubicacion_id));
+                document.getElementById('ubicacionesOcupadas').textContent = ubicacionesUnicas.size || 0;
+
+                const hoy = new Date().toISOString().split('T')[0];
+                const { data: movimientos } = await supabase
+                    .from('movimientos')
+                    .select('id')
+                    .gte('fecha_movimiento', hoy);
+                document.getElementById('movimientosHoy').textContent = movimientos?.length || 0;
+
+                const { data: stocks } = await supabase.from('inventario').select('cantidad');
+                const total = stocks?.reduce((sum, item) => sum + parseFloat(item.cantidad), 0) || 0;
+                document.getElementById('stockTotal').textContent = total.toFixed(2);
+
+                const { data: ultMov } = await supabase
+                    .from('movimientos')
+                    .select(`*, productos(codigo, descripcion), ubicaciones(codigo)`)
+                    .order('fecha_movimiento', { ascending: false })
+                    .limit(10);
+
+                const tbody = document.getElementById('ultimosMovimientos');
+                if (!ultMov || ultMov.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay movimientos</td></tr>';
+                } else {
+                    tbody.innerHTML = ultMov.map(m => `
+                        <tr>
+                            <td>${new Date(m.fecha_movimiento).toLocaleString('es-PE')}</td>
+                            <td><span style="color: ${m.tipo === 'entrada' ? '#10b981' : '#ef4444'}">${m.tipo.toUpperCase()}</span></td>
+                            <td>${m.productos?.descripcion || 'N/A'}</td>
+                            <td>${m.lote}</td>
+                            <td>${m.cantidad} ${m.unidad}</td>
+                            <td>${m.ubicaciones?.codigo || 'N/A'}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                const { data: invZona } = await supabase
+                    .from('inventario')
+                    .select(`cantidad, ubicaciones(zona)`);
+
+                const distribucion = {};
+                invZona?.forEach(item => {
+                    const zona = item.ubicaciones?.zona || 'Sin zona';
+                    if (!distribucion[zona]) distribucion[zona] = 0;
+                    distribucion[zona] += parseFloat(item.cantidad);
+                });
+
+                const container = document.getElementById('distribucionZonas');
+                container.innerHTML = Object.entries(distribucion)
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([zona, cantidad]) => `
+                        <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                            <strong>Zona ${zona}:</strong>
+                            <span>${cantidad.toFixed(2)} kg</span>
+                        </div>
+                    `).join('');
+
+            } catch (error) {
+                console.error('Error al cargar dashboard:', error);
+            }
+        }
+
+        // ======================== INVENTARIO ========================
+        async function cargarInventario() {
+            try {
+                const { data: inventario, error } = await supabase
+                    .from('inventario')
+                    .select(`*, productos(codigo, descripcion, codigo_barras, tipo), ubicaciones(codigo, zona)`)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                inventarioCompleto = inventario || [];
+                renderizarInventario(inventarioCompleto);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('tablaInventario').innerHTML = 
+                    '<tr><td colspan="8" style="text-align: center; color: red;">Error al cargar inventario</td></tr>';
+            }
+        }
+
+        function renderizarInventario(datos) {
+            const tbody = document.getElementById('tablaInventario');
+            
+            if (!datos || datos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No hay productos en inventario</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = datos.map(item => `
+                <tr>
+                    <td>${item.productos?.codigo || 'N/A'}</td>
+                    <td>${item.productos?.descripcion || 'N/A'}</td>
+                    <td>${item.lote}</td>
+                    <td>${item.ubicaciones?.codigo || 'N/A'}</td>
+                    <td><strong>${item.cantidad} ${item.unidad}</strong></td>
+                    <td>${item.productos?.tipo === 'granel' ? 'Granel' : 'IBC'}</td>
+                    <td>${new Date(item.fecha_ingreso).toLocaleDateString('es-PE')}</td>
+                    <td>
+                        ${item.productos?.codigo_barras ? 
+                            `<button class="btn btn-secondary" onclick="verCodigoBarras('${item.productos.codigo_barras}', '${item.productos.codigo}')">Ver</button>` 
+                            : 'Sin código'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('buscarProducto').addEventListener('input', filtrarInventario);
+        document.getElementById('filtroZona').addEventListener('change', filtrarInventario);
+
+        function filtrarInventario() {
+            const busqueda = document.getElementById('buscarProducto').value.toLowerCase();
+            const zona = document.getElementById('filtroZona').value;
+
+            let datosFiltrados = inventarioCompleto;
+
+            if (busqueda) {
+                datosFiltrados = datosFiltrados.filter(item => 
+                    item.productos?.codigo.toLowerCase().includes(busqueda) ||
+                    item.productos?.descripcion.toLowerCase().includes(busqueda) ||
+                    item.lote.toLowerCase().includes(busqueda)
+                );
+            }
+
+            if (zona) {
+                datosFiltrados = datosFiltrados.filter(item => 
+                    item.ubicaciones?.zona === zona
+                );
+            }
+
+            renderizarInventario(datosFiltrados);
+        }
+
+        document.getElementById('btnNuevoProducto').addEventListener('click', () => {
+            document.getElementById('modalProducto').classList.add('active');
+        });
+
+        function cerrarModal() {
+            document.getElementById('modalProducto').classList.remove('active');
+            document.getElementById('formProducto').reset();
+        }
+
+        document.getElementById('formProducto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const codigo = document.getElementById('codigoProducto').value;
+            const descripcion = document.getElementById('descripcionProducto').value;
+            const tipo = document.getElementById('tipoProducto').value;
+
+            try {
+                const codigoBarras = 'PROD' + Date.now();
+
+                const { error } = await supabase
+                    .from('productos')
+                    .insert([{ codigo, descripcion, tipo, codigo_barras: codigoBarras }]);
+
+                if (error) throw error;
+
+                alert('Producto creado exitosamente');
+                cerrarModal();
+                cargarInventario();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al crear producto: ' + error.message);
+            }
+        });
+
+        function verCodigoBarras(codigo, nombreProducto) {
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Código de Barras</h2>
+                        <span class="close-modal" onclick="this.closest('.modal').remove()">&times;</span>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <p><strong>${nombreProducto}</strong></p>
+                        <canvas id="barcodeCanvas"></canvas>
+                        <p style="margin-top: 10px; color: #666;">${codigo}</p>
+                        <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            JsBarcode("#barcodeCanvas", codigo, {
+                format: "CODE128",
+                width: 2,
+                height: 80,
+                displayValue: true
+            });
+        }
+
+        // ======================== MOVIMIENTOS ========================
+        async function cargarMovimientos() {
+            try {
+                const { data: movimientos, error } = await supabase
+                    .from('movimientos')
+                    .select(`*, productos(codigo, descripcion), ubicaciones(codigo), usuarios(nombre)`)
+                    .order('fecha_movimiento', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+                renderizarMovimientos(movimientos);
+
+                const { data: productos } = await supabase.from('productos').select('*').order('codigo');
+                const selectProducto = document.getElementById('productoId');
+                selectProducto.innerHTML = '<option value="">Seleccionar...</option>' +
+                    productos.map(p => `<option value="${p.id}">${p.codigo} - ${p.descripcion}</option>`).join('');
+
+                const { data: ubicaciones } = await supabase.from('ubicaciones').select('*').order('codigo');
+                const selectUbicacion = document.getElementById('ubicacionId');
+                selectUbicacion.innerHTML = '<option value="">Seleccionar...</option>' +
+                    ubicaciones.map(u => `<option value="${u.id}">${u.codigo} (${u.tipo})</option>`).join('');
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function renderizarMovimientos(movimientos) {
+            const tbody = document.getElementById('tablaMovimientos');
+            
+            if (!movimientos || movimientos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No hay movimientos registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = movimientos.map(m => `
+                <tr>
+                    <td>${new Date(m.fecha_movimiento).toLocaleString('es-PE')}</td>
+                    <td><span style="color: ${m.tipo === 'entrada' ? '#10b981' : '#ef4444'}; font-weight: bold;">${m.tipo.toUpperCase()}</span></td>
+                    <td>${m.productos?.codigo} - ${m.productos?.descripcion}</td>
+                    <td>${m.lote}</td>
+                    <td>${m.cantidad} ${m.unidad}</td>
+                    <td>${m.ubicaciones?.codigo}</td>
+                    <td>${m.usuarios?.nombre || 'N/A'}</td>
+                    <td>${m.observaciones || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function mostrarFormularioMov(tipo) {
+            document.getElementById('formManual').style.display = tipo === 'manual' ? 'block' : 'none';
+            document.getElementById('formExcel').style.display = tipo === 'excel' ? 'block' : 'none';
+        }
+
+        document.getElementById('formMovimiento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const movimiento = {
+                tipo: document.getElementById('tipoMovimiento').value,
+                producto_id: document.getElementById('productoId').value,
+                ubicacion_id: document.getElementById('ubicacionId').value,
+                lote: document.getElementById('lote').value,
+                cantidad: parseFloat(document.getElementById('cantidad').value),
+                unidad: document.getElementById('unidad').value,
+                observaciones: document.getElementById('observaciones').value,
+                usuario_id: currentUser.id
+            };
+
+            try {
+                const { error: errorMov } = await supabase.from('movimientos').insert([movimiento]);
+                if (errorMov) throw errorMov;
+
+                await actualizarInventario(movimiento);
+
+                alert('Movimiento registrado exitosamente');
+                document.getElementById('formMovimiento').reset();
+                cargarMovimientos();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al registrar movimiento: ' + error.message);
+            }
+        });
+
+        async function actualizarInventario(movimiento) {
+            const { data: inventarioExistente } = await supabase
+                .from('inventario')
+                .select('*')
+                .eq('producto_id', movimiento.producto_id)
+                .eq('ubicacion_id', movimiento.ubicacion_id)
+                .eq('lote', movimiento.lote)
+                .single();
+
+            if (inventarioExistente) {
+                const nuevaCantidad = movimiento.tipo === 'entrada' 
+                    ? inventarioExistente.cantidad + movimiento.cantidad
+                    : inventarioExistente.cantidad - movimiento.cantidad;
+
+                if (nuevaCantidad < 0) {
+                    throw new Error('No hay suficiente stock para esta salida');
+                }
+
+                await supabase
+                    .from('inventario')
+                    .update({ cantidad: nuevaCantidad })
+                    .eq('id', inventarioExistente.id);
+            } else {
+                if (movimiento.tipo === 'entrada') {
+                    await supabase.from('inventario').insert([{
+                        producto_id: movimiento.producto_id,
+                        ubicacion_id: movimiento.ubicacion_id,
+                        lote: movimiento.lote,
+                        cantidad: movimiento.cantidad,
+                        unidad: movimiento.unidad,
+                        fecha_ingreso: new Date().toISOString().split('T')[0]
+                    }]);
+                } else {
+                    throw new Error('No existe inventario para realizar esta salida');
+                }
+            }
+        }
+
+        async function filtrarMovimientos() {
+            const desde = document.getElementById('fechaDesde').value;
+            const hasta = document.getElementById('fechaHasta').value;
+            const tipo = document.getElementById('filtroTipo').value;
+
+            let query = supabase
+                .from('movimientos')
+                .select(`*, productos(codigo, descripcion), ubicaciones(codigo), usuarios(nombre)`)
+                .order('fecha_movimiento', { ascending: false });
+
+            if (desde) query = query.gte('fecha_movimiento', desde);
+            if (hasta) query = query.lte('fecha_movimiento', hasta + 'T23:59:59');
+            if (tipo) query = query.eq('tipo', tipo);
+
+            const { data: movimientos } = await query;
+            renderizarMovimientos(movimientos);
+        }
+
+        async function procesarExcel() {
+            const archivo = document.getElementById('archivoExcel').files[0];
+            if (!archivo) {
+                alert('Por favor selecciona un archivo');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const primeraHoja = workbook.Sheets[workbook.SheetNames[0]];
+                    const movimientos = XLSX.utils.sheet_to_json(primeraHoja);
+
+                    let exitosos = 0;
+                    let errores = 0;
+
+                    for (const mov of movimientos) {
+                        try {
+                            const { data: producto } = await supabase
+                                .from('productos')
+                                .select('id')
+                                .eq('codigo', mov.codigo_producto)
+                                .single();
+
+                            const { data: ubicacion } = await supabase
+                                .from('ubicaciones')
+                                .select('id')
+                                .eq('codigo', mov.codigo_ubicacion)
+                                .single();
+
+                            if (!producto || !ubicacion) {
+                                throw new Error('Producto o ubicación no encontrados');
+                            }
+
+                            const movimientoData = {
+                                tipo: mov.tipo,
+                                producto_id: producto.id,
+                                ubicacion_id: ubicacion.id,
+                                lote: mov.lote,
+                                cantidad: parseFloat(mov.cantidad),
+                                unidad: mov.unidad || 'kg',
+                                observaciones: mov.observaciones || '',
+                                usuario_id: currentUser.id
+                            };
+
+                            await supabase.from('movimientos').insert([movimientoData]);
+                            await actualizarInventario(movimientoData);
+                            exitosos++;
+
+                        } catch (error) {
+                            console.error('Error en fila:', error);
+                            errores++;
+                        }
+                    }
+
+                    alert(`Proceso completado:\n${exitosos} exitosos\n${errores} errores`);
+                    cargarMovimientos();
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error al procesar el archivo: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(archivo);
+        }
+
+        // ======================== SCANNER ========================
+        document.getElementById('btnIniciarScanner').addEventListener('click', async () => {
+            try {
+                document.getElementById('btnIniciarScanner').style.display = 'none';
+                document.getElementById('btnDetenerScanner').style.display = 'inline-block';
+                document.getElementById('scannerLine').style.display = 'block';
+
+                codeReader = new ZXing.BrowserMultiFormatReader();
+                
+                const videoInputDevices = await codeReader.listVideoInputDevices();
+                const camaraSeleccionada = videoInputDevices.find(device => 
+                    device.label.toLowerCase().includes('back') || 
+                    device.label.toLowerCase().includes('rear')
+                ) || videoInputDevices[0];
+
+                scannerActivo = true;
+
+                codeReader.decodeFromVideoDevice(
+                    camaraSeleccionada.deviceId,
+                    'scanner-video',
+                    async (result, err) => {
+                        if (result && scannerActivo) {
+                            await procesarCodigoBarras(result.text);
+                        }
+                    }
+                );
+
+            } catch (error) {
+                console.error('Error al iniciar escáner:', error);
+                alert('Error al acceder a la cámara. Verifica los permisos.');
+                detenerScanner();
+            }
+        });
+
+        document.getElementById('btnDetenerScanner').addEventListener('click', detenerScanner);
+
+        function detenerScanner() {
+            scannerActivo = false;
+            if (codeReader) {
+                codeReader.reset();
+            }
+            document.getElementById('btnIniciarScanner').style.display = 'inline-block';
+            document.getElementById('btnDetenerScanner').style.display = 'none';
+            document.getElementById('scannerLine').style.display = 'none';
+        }
+
+        async function procesarCodigoBarras(codigo) {
+            try {
+                const { data: producto, error } = await supabase
+                    .from('productos')
+                    .select('*')
+                    .eq('codigo_barras', codigo)
+                    .single();
+
+                if (error || !producto) {
+                    mostrarResultadoScanner('Producto no encontrado', 'error');
+                    return;
+                }
+
+                const { data: inventario } = await supabase
+                    .from('inventario')
+                    .select(`*, ubicaciones(codigo, zona)`)
+                    .eq('producto_id', producto.id);
+
+                mostrarInformacionProducto(producto, inventario);
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate(200);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarResultadoScanner('Error al buscar producto', 'error');
+            }
+        }
+
+        function mostrarInformacionProducto(producto, inventario) {
+            const totalStock = inventario?.reduce((sum, i) => sum + parseFloat(i.cantidad), 0) || 0;
+
+            const detalleHTML = `
+                <div style="background: #f9fafb; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #10b981; margin-bottom: 15px;">✓ Producto Encontrado</h3>
+                    <div style="display: grid; gap: 10px;">
+                        <p><strong>Código:</strong> ${producto.codigo}</p>
+                        <p><strong>Descripción:</strong> ${producto.descripcion}</p>
+                        <p><strong>Tipo:</strong> ${producto.tipo === 'granel' ? 'Granel' : 'IBC'}</p>
+                        <p><strong>Stock Total:</strong> ${totalStock.toFixed(2)} kg</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 15px;">Ubicaciones en Almacén:</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ubicación</th>
+                                <th>Zona</th>
+                                <th>Lote</th>
+                                <th>Cantidad</th>
+                                <th>Fecha Ingreso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${inventario && inventario.length > 0 ? inventario.map(i => `
+                                <tr>
+                                    <td><strong>${i.ubicaciones?.codigo}</strong></td>
+                                    <td>Zona ${i.ubicaciones?.zona}</td>
+                                    <td>${i.lote}</td>
+                                    <td>${i.cantidad} ${i.unidad}</td>
+                                    <td>${new Date(i.fecha_ingreso).toLocaleDateString('es-PE')}</td>
+                                </tr>
+                            `).join('') : '<tr><td colspan="5" style="text-align: center;">No hay stock disponible</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('detalleProducto').innerHTML = detalleHTML;
+            document.getElementById('infoProducto').style.display = 'block';
+            document.getElementById('infoProducto').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function mostrarResultadoScanner(mensaje, tipo) {
+            const color = tipo === 'error' ? '#ef4444' : '#10b981';
+            document.getElementById('resultadoScanner').innerHTML = `
+                <div style="background: ${tipo === 'error' ? '#fee2e2' : '#d1fae5'}; 
+                            color: ${color}; 
+                            padding: 15px; 
+                            border-radius: 8px; 
+                            text-align: center;
+                            font-weight: bold;">
+                    ${mensaje}
+                </div>
+            `;
+
+            setTimeout(() => {
+                document.getElementById('resultadoScanner').innerHTML = '';
+            }, 3000);
+        }
+
+        // ======================== ALMACÉN 3D ========================
+        function inicializarAlmacen3D() {
+            if (!scene) {
+                initThreeJS();
+                crearAlmacen3D();
+            }
+        }
+
+        function initThreeJS() {
+            const canvas = document.getElementById('canvas3d');
+            const width = canvas.clientWidth;
+            const height = 600;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(0, 15, 25);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(width, height);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            scene.add(directionalLight);
+
+            const floorGeometry = new THREE.PlaneGeometry(60, 40);
+            const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            const gridHelper = new THREE.GridHelper(60, 40, 0x667eea, 0x667eea);
+            gridHelper.material.opacity = 0.2;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            canvas.addEventListener('click', onCanvasClick);
+
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+                    camera.position.x += deltaX * 0.05;
+                    camera.position.y -= deltaY * 0.05;
+                    camera.lookAt(0, 0, 0);
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+            });
+
+            canvas.addEventListener('mouseup', () => { isDragging = false; });
+
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                camera.position.z += e.deltaY * 0.01 * 0.5;
+                camera.position.z = Math.max(10, Math.min(50, camera.position.z));
+            });
+
+            animate();
+        }
+
+        async function crearAlmacen3D() {
+            const { data: inventario } = await supabase
+                .from('inventario')
+                .select(`*, ubicaciones(id, codigo, zona), productos(codigo)`);
+
+            const { data: ubicaciones } = await supabase.from('ubicaciones').select('*').order('codigo');
+
+            const zonasConfig = {
+                'A': { x: -20, z: -12 },
+                'B': { x: -8, z: -12 },
+                'C': { x: 4, z: -12 },
+                'D': { x: 16, z: -12 },
+                'E': { x: -20, z: 0 },
+                'F': { x: -8, z: 0 },
+                'G': { x: 4, z: 0 },
+                'H': { x: 16, z: 0 }
+            };
+
+            const zonasMap = new Map();
+            ubicaciones.forEach(u => {
+                if (!zonasMap.has(u.zona)) zonasMap.set(u.zona, []);
+                zonasMap.get(u.zona).push(u);
+            });
+
+            zonasMap.forEach((ubicacionesZona, zona) => {
+                const config = zonasConfig[zona];
+                if (!config) return;
+
+                ubicacionesZona.forEach((ubicacion, index) => {
+                    const ocupada = inventario?.some(inv => inv.ubicaciones.id === ubicacion.id);
+                    
+                    const geometry = new THREE.BoxGeometry(2, 3, 2);
+                    const material = new THREE.MeshStandardMaterial({
+                        color: ocupada ? 0x10b981 : 0xef4444,
+                        emissive: ocupada ? 0x065f46 : 0x7f1d1d,
+                        emissiveIntensity: 0.2
+                    });
+
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.set(config.x + (index * 2.5), 1.5, config.z);
+                    mesh.userData = { zona, ubicacion, ocupada };
+
+                    scene.add(mesh);
+                    zonasMeshes.push(mesh);
+                });
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        function onCanvasClick(event) {
+            const canvas = document.getElementById('canvas3d');
+            const rect = canvas.getBoundingClientRect();
+            
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(zonasMeshes);
+
+            if (intersects.length > 0) {
+                const objeto = intersects[0].object;
+                mostrarDetalleZona(objeto.userData.zona);
+            }
+        }
+
+        function enfocarZona(zona) {
+            const zonasConfig = {
+                'A': { x: -20, z: -12 },
+                'B': { x: -8, z: -12 },
+                'C': { x: 4, z: -12 },
+                'D': { x: 16, z: -12 },
+                'E': { x: -20, z: 0 },
+                'F': { x: -8, z: 0 },
+                'G': { x: 4, z: 0 },
+                'H': { x: 16, z: 0 }
+            };
+
+            const config = zonasConfig[zona];
+            if (config) {
+                camera.position.set(config.x, 8, config.z + 15);
+                camera.lookAt(config.x, 0, config.z);
+            }
+
+            mostrarDetalleZona(zona);
+        }
+
+        async function mostrarDetalleZona(zona) {
+            document.getElementById('zonaSeleccionada').textContent = zona;
+            
+            const { data: ubicaciones } = await supabase
+                .from('ubicaciones')
+                .select('*')
+                .eq('zona', zona)
+                .order('codigo');
+
+            const { data: inventario } = await supabase
+                .from('inventario')
+                .select(`*, ubicaciones!inner(id, codigo, zona), productos(codigo, descripcion)`)
+                .eq('ubicaciones.zona', zona);
+
+            const lista = document.getElementById('listaUbicaciones');
+            lista.innerHTML = ubicaciones.map(u => {
+                const inv = inventario?.find(i => i.ubicaciones.id === u.id);
+                const ocupada = !!inv;
+
+                return `
+                    <div style="padding: 15px; margin: 10px 0; background: ${ocupada ? '#d1fae5' : '#fee2e2'}; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${u.codigo}</strong>
+                                <br>
+                                <small>${u.tipo === 'granel' ? 'Granel' : 'IBC'}</small>
+                            </div>
+                            <div style="text-align: right;">
+                                ${ocupada ? `
+                                    <strong style="color: #10b981;">${inv.cantidad} ${inv.unidad}</strong>
+                                    <br>
+                                    <small>${inv.productos.descripcion}</small>
+                                    <br>
+                                    <small>Lote: ${inv.lote}</small>
+                                ` : '<span style="color: #ef4444;">Vacía</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('detalleZona').style.display = 'block';
+            document.getElementById('detalleZona').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetearVista() {
+            camera.position.set(0, 15, 25);
+            camera.lookAt(0, 0, 0);
+            document.getElementById('detalleZona').style.display = 'none';
+        }
+
+        // ======================== REPORTES ========================
+        function inicializarReportes() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const hace30Dias = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            document.getElementById('movFechaDesde').value = hace30Dias;
+            document.getElementById('movFechaHasta').value = hoy;
+        }
+
+        async function generarReportePDF(tipo) {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFont('helvetica');
+                doc.setFontSize(18);
+                doc.text('Sistema de Almacén - Reporte', 14, 20);
+                doc.setFontSize(12);
+                doc.text(`Generado: ${new Date().toLocaleString('es-PE')}`, 14, 28);
+                doc.text(`Usuario: ${currentUser.nombre}`, 14, 34);
+
+                let datos = [];
+                let columnas = [];
+                let titulo = '';
+
+                if (tipo === 'inventario') {
+                    titulo = 'Inventario Actual';
+                    const { data } = await supabase
+                        .from('inventario')
+                        .select(`*, productos(codigo, descripcion), ubicaciones(codigo)`);
+
+                    columnas = ['Código', 'Producto', 'Lote', 'Ubicación', 'Cantidad', 'Unidad'];
+                    datos = data.map(i => [
+                        i.productos?.codigo || '',
+                        i.productos?.descripcion || '',
+                        i.lote,
+                        i.ubicaciones?.codigo || '',
+                        i.cantidad,
+                        i.unidad
+                    ]);
+
+                } else if (tipo === 'movimientos') {
+                    titulo = 'Historial de Movimientos';
+                    const desde = document.getElementById('movFechaDesde').value;
+                    const hasta = document.getElementById('movFechaHasta').value;
+
+                    let query = supabase
+                        .from('movimientos')
+                        .select(`*, productos(codigo, descripcion), ubicaciones(codigo)`);
+
+                    if (desde) query = query.gte('fecha_movimiento', desde);
+                    if (hasta) query = query.lte('fecha_movimiento', hasta);
+
+                    const { data } = await query.order('fecha_movimiento', { ascending: false });
+
+                    columnas = ['Fecha', 'Tipo', 'Producto', 'Lote', 'Cantidad', 'Ubicación'];
+                    datos = data.map(m => [
+                        new Date(m.fecha_movimiento).toLocaleDateString('es-PE'),
+                        m.tipo.toUpperCase(),
+                        m.productos?.descripcion || '',
+                        m.lote,
+                        `${m.cantidad} ${m.unidad}`,
+                        m.ubicaciones?.codigo || ''
+                    ]);
+
+                } else if (tipo === 'zona') {
+                    titulo = 'Stock por Zona';
+                    const zona = document.getElementById('zonaReporte').value;
+
+                    let query = supabase
+                        .from('inventario')
+                        .select(`*, productos(codigo, descripcion), ubicaciones(codigo, zona)`);
+
+                    if (zona) {
+                        const { data: ubicaciones } = await supabase
+                            .from('ubicaciones')
+                            .select('id')
+                            .eq('zona', zona);
+                        
+                        const ids = ubicaciones.map(u => u.id);
+                        query = query.in('ubicacion_id', ids);
+                    }
+
+                    const { data } = await query;
+
+                    columnas = ['Zona', 'Ubicación', 'Producto', 'Lote', 'Cantidad'];
+                    datos = data.map(i => [
+                        i.ubicaciones?.zona || '',
+                        i.ubicaciones?.codigo || '',
+                        i.productos?.descripcion || '',
+                        i.lote,
+                        `${i.cantidad} ${i.unidad}`
+                    ]);
+
+                } else if (tipo === 'productos') {
+                    titulo = 'Catálogo de Productos';
+                    const { data } = await supabase.from('productos').select('*').order('codigo');
+
+                    columnas = ['Código', 'Descripción', 'Tipo', 'Código Barras'];
+                    datos = data.map(p => [
+                        p.codigo,
+                        p.descripcion,
+                        p.tipo === 'granel' ? 'Granel' : 'IBC',
+                        p.codigo_barras || ''
+                    ]);
+                }
+
+                doc.setFontSize(14);
+                doc.text(titulo, 14, 45);
+
+                doc.autoTable({
+                    head: [columnas],
+                    body: datos,
+                    startY: 52,
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [102, 126, 234] }
+                });
+
+                doc.save(`reporte_${tipo}_${Date.now()}.pdf`);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al generar el reporte PDF');
+            }
+        }
+
+        async function generarReporteExcel(tipo) {
+            try {
+                let datos = [];
+                let nombreHoja = '';
+                let nombreArchivo = '';
+
+                if (tipo === 'inventario') {
+                    nombreHoja = 'Inventario';
+                    nombreArchivo = 'inventario';
+                    
+                    const { data } = await supabase
+                        .from('inventario')
+                        .select(`*, productos(codigo, descripcion), ubicaciones(codigo, zona)`);
+
+                    datos = data.map(i => ({
+                        'Código': i.productos?.codigo || '',
+                        'Descripción': i.productos?.descripcion || '',
+                        'Lote': i.lote,
+                        'Ubicación': i.ubicaciones?.codigo || '',
+                        'Zona': i.ubicaciones?.zona || '',
+                        'Cantidad': i.cantidad,
+                        'Unidad': i.unidad,
+                        'Fecha Ingreso': new Date(i.fecha_ingreso).toLocaleDateString('es-PE')
+                    }));
+
+                } else if (tipo === 'movimientos') {
+                    nombreHoja = 'Movimientos';
+                    nombreArchivo = 'movimientos';
+                    
+                    const desde = document.getElementById('movFechaDesde').value;
+                    const hasta = document.getElementById('movFechaHasta').value;
+
+                    let query = supabase
+                        .from('movimientos')
+                        .select(`*, productos(codigo, descripcion), ubicaciones(codigo), usuarios(nombre)`);
+
+                    if (desde) query = query.gte('fecha_movimiento', desde);
+                    if (hasta) query = query.lte('fecha_movimiento', hasta);
+
+                    const { data } = await query.order('fecha_movimiento', { ascending: false });
+
+                    datos = data.map(m => ({
+                        'Fecha': new Date(m.fecha_movimiento).toLocaleString('es-PE'),
+                        'Tipo': m.tipo.toUpperCase(),
+                        'Código Producto': m.productos?.codigo || '',
+                        'Producto': m.productos?.descripcion || '',
+                        'Lote': m.lote,
+                        'Cantidad': m.cantidad,
+                        'Unidad': m.unidad,
+                        'Ubicación': m.ubicaciones?.codigo || '',
+                        'Usuario': m.usuarios?.nombre || '',
+                        'Observaciones': m.observaciones || ''
+                    }));
+
+                } else if (tipo === 'zona') {
+                    nombreHoja = 'Stock por Zona';
+                    nombreArchivo = 'stock_zona';
+                    
+                    const zona = document.getElementById('zonaReporte').value;
+
+                    let query = supabase
+                        .from('inventario')
+                        .select(`*, productos(codigo, descripcion), ubicaciones(codigo, zona)`);
+
+                    if (zona) {
+                        const { data: ubicaciones } = await supabase
+                            .from('ubicaciones')
+                            .select('id')
+                            .eq('zona', zona);
+                        
+                        const ids = ubicaciones.map(u => u.id);
+                        query = query.in('ubicacion_id', ids);
+                    }
+
+                    const { data } = await query;
+
+                    datos = data.map(i => ({
+                        'Zona': i.ubicaciones?.zona || '',
+                        'Ubicación': i.ubicaciones?.codigo || '',
+                        'Código': i.productos?.codigo || '',
+                        'Producto': i.productos?.descripcion || '',
+                        'Lote': i.lote,
+                        'Cantidad': i.cantidad,
+                        'Unidad': i.unidad
+                    }));
+
+                } else if (tipo === 'productos') {
+                    nombreHoja = 'Productos';
+                    nombreArchivo = 'catalogo_productos';
+                    
+                    const { data } = await supabase.from('productos').select('*').order('codigo');
+
+                    datos = data.map(p => ({
+                        'Código': p.codigo,
+                        'Descripción': p.descripcion,
+                        'Tipo': p.tipo === 'granel' ? 'Granel' : 'IBC',
+                        'Código de Barras': p.codigo_barras || '',
+                        'Fecha Creación': new Date(p.created_at).toLocaleDateString('es-PE')
+                    }));
+                }
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(datos);
+
+                const colWidths = Object.keys(datos[0] || {}).map(key => ({
+                    wch: Math.max(key.length, 15)
+                }));
+                ws['!cols'] = colWidths;
+
+                XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
+                XLSX.writeFile(wb, `${nombreArchivo}_${Date.now()}.xlsx`);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al generar el reporte Excel');
+            }
+        }
+
+        // ======================== INICIALIZACIÓN ========================
+        // Esperar a que el DOM y las librerías estén completamente cargadas
+        window.addEventListener('load', function() {
+            console.log('Iniciando aplicación...');
+            
+            // Esperar un momento para que las librerías CDN se carguen
+            setTimeout(function() {
+                // Inicializar Supabase
+                if (!initSupabase()) {
+                    alert('Error: No se pudo conectar con la base de datos. Verifica tu conexión a internet y las credenciales.');
+                    return;
+                }
+                
+                // Iniciar la aplicación
+                if (checkAuth()) {
+                    showSection('dashboard');
+                }
+            }, 500);
+        });
+
+        // Limpiar recursos al cerrar
+        window.addEventListener('beforeunload', function() {
+            if (codeReader) {
+                codeReader.reset();
+            }
+        });
+        
+        // Exponer funciones necesarias globalmente para los onclick en HTML
+        window.showSection = showSection;
+        window.logout = logout;
+        window.cerrarModal = cerrarModal;
+        window.verCodigoBarras = verCodigoBarras;
+        window.mostrarFormularioMov = mostrarFormularioMov;
+        window.procesarExcel = procesarExcel;
+        window.filtrarMovimientos = filtrarMovimientos;
+        window.enfocarZona = enfocarZona;
+        window.resetearVista = resetearVista;
+        window.generarReportePDF = generarReportePDF;
+        window.generarReporteExcel = generarReporteExcel;
+        
+    })(); // Fin de la función auto-ejecutable
+    </script>
+</body>
+</html>">
+                            <h3 style="color: #667eea; margin-bottom: 15px;">📦 Inventario Actual</h3>
+                            <p style="color: #6b7280; margin-bottom: 15px;">Reporte completo del stock actual</p>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-danger" onclick="generarReportePDF('inventario')">PDF</button>
+                                <button class="btn btn-success" onclick="generarReporteExcel('inventario')">Excel</button>
+                            </div>
+                        </div>
+
+                        <div style="border: 2px solid #e5e7eb; padding: 20px; border-radius: 10px
