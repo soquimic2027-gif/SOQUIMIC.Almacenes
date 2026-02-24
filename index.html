@@ -1377,10 +1377,11 @@ async function submitRequest() {
   if (isSB) {
     load('Enviando solicitud...');
     try {
-      const {data:req,error:re} = await sbClient.from('loan_requests').insert(reqData).select().single();
+      const {data:rpcData, error:re} = await sbClient.rpc('create_loan_request', {
+        p_request: reqData,
+        p_items:   itemsData
+      });
       if (re) throw re;
-      const {error:ie} = await sbClient.from('loan_items').insert(itemsData.map(i=>({...i,request_id:req.id})));
-      if (ie) throw ie;
       noLoad(); toast('Solicitud enviada correctamente','ok');
       printForm({...reqData, items:itemsData});
       resetEmployee();
