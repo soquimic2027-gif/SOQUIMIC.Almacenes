@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>SOQUIMIC · Préstamos de Equipos</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -58,9 +58,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--c-bg);color:var(--c-text)
   align-items:center;justify-content:center;padding:2rem;gap:3rem;
 }
 .land-logo{text-align:center}
-.land-logo img{height:90px;mix-blend-mode:screen;filter:saturate(1.1)}
+.land-logo img{height:160px;mix-blend-mode:screen;filter:saturate(1.1);image-rendering:crisp-edges}
 .land-tagline{
-  font-family:'Syne',sans-serif;font-size:.7rem;letter-spacing:.4em;
+  font-family:'Bebas Neue',sans-serif;font-size:.7rem;letter-spacing:.4em;
   text-transform:uppercase;color:var(--c-text3);margin-top:.6rem;
 }
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;width:100%;max-width:720px}
@@ -84,7 +84,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--c-bg);color:var(--c-text)
   display:flex;align-items:center;justify-content:center;
   font-size:1.4rem;margin-bottom:1.25rem;
 }
-.rc-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--c-text);margin-bottom:.4rem}
+.rc-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;font-weight:700;color:var(--c-text);margin-bottom:.4rem}
 .rc-desc{font-size:.82rem;color:var(--c-text2);line-height:1.7}
 .rc-badge{
   display:inline-flex;align-items:center;gap:.35rem;
@@ -105,13 +105,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--c-bg);color:var(--c-text)
    SHARED HEADER
 ══════════════════════════════════════════════ */
 .app-header{
-  height:88px;padding:0 2rem;
+  height:108px;padding:0 2rem;
   display:flex;align-items:center;justify-content:space-between;
   background:rgba(10,11,13,0.85);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--c-border2);
   position:sticky;top:0;z-index:200;
 }
-.header-logo img{height:72px;mix-blend-mode:screen;filter:saturate(1.1)}
+.header-logo img{height:132px;mix-blend-mode:screen;filter:contrast(1.05) saturate(1.1);image-rendering:crisp-edges}
 .header-actions{display:flex;align-items:center;gap:.75rem}
 .chip{
   padding:.3rem .9rem;border-radius:20px;font-size:.72rem;font-weight:600;
@@ -186,7 +186,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--c-bg);color:var(--c-text)
   border-radius:var(--radius);padding:1.5rem;
 }
 .card-title{
-  font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;font-weight:700;
   color:var(--c-text);margin-bottom:1.25rem;
   display:flex;align-items:center;gap:.6rem;
 }
@@ -242,7 +242,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   background:var(--stat-color,var(--c-orange));
 }
 .stat-num{
-  font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;
+  font-family:'Bebas Neue',sans-serif;font-size:2.2rem;font-weight:800;
   color:var(--stat-color,var(--c-orange));line-height:1;margin-bottom:.3rem;
 }
 .stat-lbl{font-size:.7rem;color:var(--c-text3);font-weight:500;text-transform:uppercase;letter-spacing:.05em}
@@ -310,7 +310,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   color:var(--c-text3);font-size:.85rem;pointer-events:none;
 }
 .section-sep{
-  font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;
+  font-family:'Bebas Neue',sans-serif;font-size:.65rem;font-weight:700;
   letter-spacing:.12em;text-transform:uppercase;color:var(--c-text3);
   padding:.5rem 0 .4rem;margin-top:.5rem;
   border-top:1px solid var(--c-border2);
@@ -331,7 +331,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   border-color:var(--c-orange);background:var(--c-orange-s);
 }
 .inv-item.no-stock{opacity:.4;cursor:not-allowed;pointer-events:none}
-.ii-icon{font-size:1.25rem;flex-shrink:0;width:28px;text-align:center}
+.ii-icon{flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:var(--c-text3);opacity:.7}
 .ii-name{flex:1;font-size:.8rem;font-weight:500;line-height:1.4}
 .ii-code{font-size:.65rem;color:var(--c-text3);font-family:'DM Mono',monospace}
 .ii-stock{
@@ -404,9 +404,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   border-radius:var(--radius-lg);padding:2.5rem;
 }
 .login-logo{text-align:center;margin-bottom:2rem}
-.login-logo img{height:64px;mix-blend-mode:screen;filter:saturate(1.1)}
+.login-logo img{height:100px;mix-blend-mode:screen;filter:contrast(1.05) saturate(1.1);image-rendering:crisp-edges}
 .login-title{
-  font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;font-weight:700;
   text-align:center;color:var(--c-text);margin-bottom:.3rem;
 }
 .login-sub{text-align:center;font-size:.8rem;color:var(--c-text3);margin-bottom:2rem}
@@ -420,7 +420,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   display:flex;align-items:flex-start;justify-content:space-between;
   margin-bottom:1.75rem;flex-wrap:wrap;gap:1rem;
 }
-.page-title{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--c-text)}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;font-weight:800;color:var(--c-text)}
 .page-sub{font-size:.8rem;color:var(--c-text3);margin-top:.25rem}
 
 /* ══════════════════════════════════════════════
@@ -438,7 +438,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   position:relative;box-shadow:var(--shadow);
   animation:slideUp .2s cubic-bezier(0.4,0,0.2,1);
 }
-.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem}
 .modal-close{
   position:absolute;top:1.25rem;right:1.25rem;
   background:var(--c-surface2);border:1px solid var(--c-border);
@@ -539,7 +539,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 }
 .pf-code-row:last-child{border-bottom:none}
 .pf-sec-hdr{
-  background:#c04000;color:#fff;font-weight:700;
+  background:#bf4800;color:#fff;font-weight:700;
   font-size:7pt;padding:1.2mm 2mm;text-transform:uppercase;margin-bottom:1.5mm;
 }
 .pf-tbl{width:100%;border-collapse:collapse;margin-bottom:2.5mm;font-size:7pt}
@@ -602,13 +602,13 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-req"><div class="modal">
-  <button class="modal-close" onclick="closeModal('modal-req')">✕</button>
+  <button class="modal-close" onclick="closeModal('modal-req')"><svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button>
   <div class="modal-title" id="modal-req-title">Solicitud</div>
   <div id="modal-req-body"></div>
 </div></div>
 
 <div class="modal-overlay" id="modal-inv"><div class="modal" style="max-width:480px">
-  <button class="modal-close" onclick="closeModal('modal-inv')">✕</button>
+  <button class="modal-close" onclick="closeModal('modal-inv')"><svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button>
   <div class="modal-title" id="modal-inv-title">Item de inventario</div>
   <div id="modal-inv-body"></div>
 </div></div>
@@ -624,14 +624,14 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
   <div class="role-grid">
     <div class="role-card" onclick="gotoEmployee()">
       <div class="rc-arrow">↗</div>
-      <div class="rc-icon">📋</div>
+      <div class="rc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg></div>
       <div class="rc-title">Soy empleado</div>
       <div class="rc-desc">Genera tu solicitud de préstamo de equipos de laboratorio. No requiere cuenta.</div>
       <div class="rc-badge rc-badge-open">Acceso libre</div>
     </div>
     <div class="role-card" onclick="gotoLogin()">
       <div class="rc-arrow">↗</div>
-      <div class="rc-icon">🏭</div>
+      <div class="rc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
       <div class="rc-title">Área de almacén</div>
       <div class="rc-desc">Gestiona solicitudes, aprueba entregas, controla inventario y genera reportes.</div>
       <div class="rc-badge rc-badge-locked">Acceso restringido</div>
@@ -722,32 +722,32 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-group">
             <label class="label">Nombre completo <span class="req">*</span></label>
             <input class="input" id="s1-nombre" placeholder="Ej: Juan Pérez García">
-            <div class="field-error" id="e-nombre" style="display:none">⚠ Ingresa tu nombre completo</div>
+            <div class="field-error" id="e-nombre" style="display:none">Ingresa tu nombre completo</div>
           </div>
           <div class="form-group">
             <label class="label">DNI <span class="req">*</span></label>
             <input class="input" id="s1-dni" placeholder="12345678" maxlength="8" oninput="this.value=this.value.replace(/\D/g,'')">
-            <div class="field-error" id="e-dni" style="display:none">⚠ DNI debe tener 8 dígitos</div>
+            <div class="field-error" id="e-dni" style="display:none">DNI debe tener 8 dígitos</div>
           </div>
           <div class="form-group">
             <label class="label">Cargo / Puesto <span class="req">*</span></label>
             <input class="input" id="s1-cargo" placeholder="Ej: Técnico de laboratorio">
-            <div class="field-error" id="e-cargo" style="display:none">⚠ Ingresa tu cargo</div>
+            <div class="field-error" id="e-cargo" style="display:none">Ingresa tu cargo</div>
           </div>
           <div class="form-group">
             <label class="label">Área <span class="req">*</span></label>
             <input class="input" id="s1-area" placeholder="Ej: Laboratorio, Shotcrete">
-            <div class="field-error" id="e-area" style="display:none">⚠ Ingresa tu área</div>
+            <div class="field-error" id="e-area" style="display:none">Ingresa tu área</div>
           </div>
           <div class="form-group">
             <label class="label">Fecha de préstamo <span class="req">*</span></label>
             <input class="input" id="s1-fprestamo" type="date">
-            <div class="field-error" id="e-fprestamo" style="display:none">⚠ Selecciona la fecha</div>
+            <div class="field-error" id="e-fprestamo" style="display:none">Selecciona la fecha</div>
           </div>
           <div class="form-group">
             <label class="label">Fecha de retorno estimada <span class="req">*</span></label>
             <input class="input" id="s1-fretorno" type="date">
-            <div class="field-error" id="e-fretorno" style="display:none">⚠ Selecciona la fecha de retorno</div>
+            <div class="field-error" id="e-fretorno" style="display:none">Selecciona la fecha de retorno</div>
           </div>
         </div>
       </div>
@@ -764,7 +764,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-group">
             <label class="label">Cliente / Empresa <span class="req">*</span></label>
             <input class="input" id="s2-cliente" placeholder="Nombre del cliente o empresa">
-            <div class="field-error" id="e-cliente" style="display:none">⚠ Ingresa el nombre del cliente</div>
+            <div class="field-error" id="e-cliente" style="display:none">Ingresa el nombre del cliente</div>
           </div>
           <div class="form-group">
             <label class="label">RUC</label>
@@ -773,12 +773,12 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <div class="form-group" style="grid-column:1/-1">
             <label class="label">Dirección / Ciudad <span class="req">*</span></label>
             <input class="input" id="s2-dir" placeholder="Av. ejemplo 123, Lima">
-            <div class="field-error" id="e-dir" style="display:none">⚠ Ingresa la dirección</div>
+            <div class="field-error" id="e-dir" style="display:none">Ingresa la dirección</div>
           </div>
           <div class="form-group" style="grid-column:1/-1">
             <label class="label">Proyecto / Descripción de obra <span class="req">*</span></label>
             <input class="input" id="s2-proyecto" placeholder="Descripción del proyecto o trabajo a realizar">
-            <div class="field-error" id="e-proyecto" style="display:none">⚠ Describe el proyecto</div>
+            <div class="field-error" id="e-proyecto" style="display:none">Describe el proyecto</div>
           </div>
         </div>
       </div>
@@ -793,7 +793,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div class="card" style="margin-bottom:1rem">
         <div class="card-title">Selección de equipos</div>
         <div class="inv-search-wrap">
-          <span class="inv-search-icon">🔍</span>
+          <span class="inv-search-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
           <input class="inv-search" id="inv-q" placeholder="Buscar por nombre o código..." oninput="renderInv()">
         </div>
         <div id="inv-container"></div>
@@ -817,7 +817,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
       <div style="display:flex;justify-content:space-between;margin-top:1rem;gap:.75rem;flex-wrap:wrap">
         <button class="btn btn-outline" onclick="goStep(3)">← Atrás</button>
         <div style="display:flex;gap:.75rem">
-          <button class="btn btn-outline" onclick="previewPrint()">🖨 Vista previa</button>
+          <button class="btn btn-outline" onclick="previewPrint()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Vista previa</button>
           <button class="btn btn-primary" id="btn-submit" onclick="submitRequest()">✓ Enviar solicitud</button>
         </div>
       </div>
@@ -849,9 +849,9 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
     </div>
 
     <div class="tabs">
-      <div class="tab active" onclick="adminTab('solicitudes',this)">📋 Solicitudes</div>
-      <div class="tab" onclick="adminTab('inventario',this)">📦 Inventario</div>
-      <div class="tab" onclick="adminTab('excel',this)">📊 Importar Excel</div>
+      <div class="tab active" onclick="adminTab('solicitudes',this)">Solicitudes</div>
+      <div class="tab" onclick="adminTab('inventario',this)">Inventario</div>
+      <div class="tab" onclick="adminTab('excel',this)">Importar Excel</div>
     </div>
 
     <!-- TAB Solicitudes -->
@@ -866,7 +866,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
           <option value="rechazado">Rechazado</option>
         </select>
         <input class="input" style="max-width:240px" placeholder="Buscar nombre o DNI..." id="f-search" oninput="loadReqs()">
-        <button class="btn btn-outline btn-sm" onclick="loadReqs()">↺ Actualizar</button>
+        <button class="btn btn-outline btn-sm" onclick="loadReqs()">Actualizar</button>
       </div>
       <div class="tbl-wrap">
         <table><thead><tr>
@@ -910,7 +910,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
              ondrop="handleDrop(event)"
              ondragover="event.preventDefault();this.classList.add('drag')"
              ondragleave="this.classList.remove('drag')">
-          <div class="uz-icon">📊</div>
+          <div class="uz-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-text3)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
           <div class="uz-text">Arrastra tu archivo Excel aquí o haz clic para seleccionar</div>
           <div class="uz-hint">Formatos aceptados: .xlsx · .xls</div>
         </div>
@@ -933,7 +933,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02)}
         <p style="font-size:.82rem;color:var(--c-text2);margin-bottom:1rem;line-height:1.6">
           Descarga la plantilla con los encabezados exactos de tu ERP para asegurarte de que el formato sea compatible.
         </p>
-        <button class="btn btn-outline btn-sm" onclick="downloadTemplate()">⬇ Descargar plantilla .xlsx</button>
+        <button class="btn btn-outline btn-sm" onclick="downloadTemplate()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar plantilla .xlsx</button>
       </div>
     </div>
   </div>
@@ -1024,7 +1024,7 @@ async function fetchInventory() {
     const { data, error } = await sbClient.from('inventory').select('*').order('name');
     if (error) {
       const msg = error?.message || JSON.stringify(error);
-      if (msg.includes('does not exist')) toast('⚠ Ejecuta primero el schema SQL en Supabase','err');
+      if (msg.includes('does not exist')) toast('Ejecuta primero el schema SQL en Supabase','err');
       else toast('Error inventario: '+msg,'err');
       inventory = []; return;
     }
@@ -1049,7 +1049,7 @@ function renderInv() {
   if (Object.keys(bySec).length === 0) {
     document.getElementById('inv-container').innerHTML =
       '<div style="text-align:center;padding:2rem;color:var(--c-text3)">'+
-      (inventory.length===0 ? '⚠ Sin inventario. El administrador debe subir el Excel.' : 'Sin resultados para tu búsqueda.')+
+      (inventory.length===0 ? 'Sin inventario. El administrador debe subir el Excel.' : 'Sin resultados para tu búsqueda.')+
       '</div>';
     return;
   }
@@ -1066,7 +1066,7 @@ function renderInv() {
       const stockCls = av<=0?'out':av<=2?'low':'ok';
       html += `
         <div class="inv-item ${inCart?'selected':''} ${noStock?'no-stock':''}" onclick="toggleItem('${item.id}')">
-          <div class="ii-icon">${item.icon||'📦'}</div>
+          <div class="ii-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
           <div style="flex:1;min-width:0">
             <div class="ii-name">${item.name}</div>
             ${item.code?`<div class="ii-code">${item.code}</div>`:''}
@@ -1121,10 +1121,10 @@ function renderCart() {
   card.style.display = 'block';
   document.getElementById('cart-body').innerHTML = items.map(({item,qty}) => `
     <div class="cart-item">
-      <span>${item.icon||'📦'} ${item.name}</span>
+      <span> ${item.name}</span>
       <div style="display:flex;align-items:center;gap:.5rem">
         <span class="cart-qty">×${qty}</span>
-        <button class="btn btn-danger btn-xs" onclick="toggleItem('${item.id}')">✕</button>
+        <button class="btn btn-danger btn-xs" onclick="toggleItem('${item.id}')"><svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button>
       </div>
     </div>`).join('');
 }
@@ -1170,7 +1170,7 @@ function validateStep1() {
   const fr = document.getElementById('s1-fretorno').value;
   if (fr && fp && fr < fp) {
     document.getElementById('s1-fretorno').classList.add('error');
-    document.getElementById('e-fretorno').textContent = '⚠ La fecha de retorno debe ser posterior al préstamo';
+    document.getElementById('e-fretorno').textContent = 'La fecha de retorno debe ser posterior al préstamo';
     document.getElementById('e-fretorno').style.display = 'flex';
     toast('La fecha de retorno debe ser posterior al préstamo','err');
     return;
@@ -1223,7 +1223,7 @@ function buildSummary() {
       </div>
       ${ci.map(({item,qty}) => `
         <div class="cart-item">
-          <span>${item.icon||'📦'} ${item.name}</span>
+          <span> ${item.name}</span>
           <span class="cart-qty">×${qty}</span>
         </div>`).join('')}
     </div>`;
@@ -1508,8 +1508,8 @@ async function loadReqs() {
       <td>
         <div style="display:flex;gap:.35rem">
           <button class="btn btn-outline btn-xs" onclick="openReqModal('${r.id}')">Ver</button>
-          <button class="btn btn-outline btn-xs" onclick="printAdminReq('${r.id}')">🖨</button>
-          <button class="btn btn-danger btn-xs" onclick="deleteReq('${r.id}')">✕</button>
+          <button class="btn btn-outline btn-xs" onclick="printAdminReq('${r.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+          <button class="btn btn-danger btn-xs" onclick="deleteReq('${r.id}')"><svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button>
         </div>
       </td>
     </tr>`).join('');
@@ -1558,7 +1558,7 @@ function openReqModal(id) {
       <textarea class="textarea" id="obs-retorno">${r.obs_retorno||''}</textarea>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:.75rem;margin-top:1rem">
-      <button class="btn btn-outline btn-sm" onclick="printAdminReq('${id}')">🖨 Imprimir</button>
+      <button class="btn btn-outline btn-sm" onclick="printAdminReq('${id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir</button>
       <button class="btn btn-primary btn-sm" onclick="saveObs('${id}')">Guardar cambios</button>
     </div>`;
   openModal('modal-req');
@@ -1605,14 +1605,14 @@ async function loadInv() {
     const color = av<=0?'var(--c-red)':av<=2?'var(--c-yellow)':'var(--c-green)';
     return `<tr>
       <td style="font-family:'DM Mono',monospace;font-size:.72rem">${item.code||'—'}</td>
-      <td>${item.icon||'📦'} ${item.name}</td>
+      <td> ${item.name}</td>
       <td style="font-size:.75rem;color:var(--c-text3)">${item.section||'—'}</td>
       <td style="font-size:.75rem;color:var(--c-text2)">${item.family||'—'}</td>
       <td style="font-family:'DM Mono',monospace">${item.stock??0}</td>
       <td style="font-family:'DM Mono',monospace;font-weight:700;color:${color}">${av}</td>
       <td><div style="display:flex;gap:.35rem">
         <button class="btn btn-outline btn-xs" onclick="openInvModal('${item.id}')">Editar</button>
-        <button class="btn btn-danger btn-xs" onclick="delInv('${item.id}')">✕</button>
+        <button class="btn btn-danger btn-xs" onclick="delInv('${item.id}')"><svg width="10" height="10" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg></button>
       </div></td>
     </tr>`;
   }).join('') || '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--c-text3)">Sin resultados</td></tr>';
@@ -1763,7 +1763,7 @@ async function confirmUpload() {
       product_class: get(row,'clasificación de productos','clasificacion de productos'),
       foreign_name: get(row,'nombre extranjero'),
       weight: parseFloat(get(row,'peso'))||0,
-      icon: '📦', section: 'adicional', inactive: false,
+      icon: '', section: 'adicional', inactive: false,
     };
 
     if (code) {
@@ -1775,7 +1775,7 @@ async function confirmUpload() {
     }
   }
   noLoad();
-  toast(`✓ ${ok} actualizados · ${skip} omitidos${err?` · ⚠ ${err} errores`:''}`, ok>0?'ok':'err');
+  toast(`✓ ${ok} actualizados · ${skip} omitidos${err?` · ${err} errores`:''}`, ok>0?'ok':'err');
   document.getElementById('excel-prev').style.display = 'none';
   excelRows = [];
   await loadInv();
