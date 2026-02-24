@@ -1758,85 +1758,160 @@ function cancelPrev(type) {
 }
 
 async function confirmUpload(type) {
-  if(!isSB){toast('Supabase no configurado','err');return;}
-  const rows = type==='inv' ? excelInv : excelCli;
-  if(!rows.length){toast('Sin datos','err');return;}
-  load(`Actualizando ${type==='inv'?'inventario':'clientes'}...`);
-  let ok=0, skip=0, err=0;
+  if (!isSB) { toast('Supabase no configurado','err'); return; }
+  const rows = type === 'inv' ? excelInv : excelCli;
+  if (!rows.length) { toast('Sin datos','err'); return; }
 
-  if (type==='inv') {
-    for (const row of rows) {
-      const name=get(row,'descripcion del articulo','descripcion','name');
-      if(!name){skip++;continue;}
-      const inactive=get(row,'inactivo','inactive').toLowerCase();
-      if(['si','si','y','yes','true','1'].includes(inactive)){skip++;continue;}
-      const code=get(row,'numero de articulo','code','codigo');
-      const stock=Math.max(0,Math.round(parseFloat(get(row,'en stock','stock'))||0));
-      const payload={
-        code:code||null, name, stock, available:stock, inactive:false,
-        stock_type:get(row,'tipo existencia'),
-        item_group:get(row,'grupo de articulos'),
-        sale_item:get(row,'articulo venta'),
-        container:get(row,'envase'),
-        warehouse:get(row,'almacen predeterminado'),
-        segment:get(row,'segmento'), family:get(row,'familia'), class:get(row,'clase'),
-        sunat_code:get(row,'codigo sunat'), has_lot:get(row,'lote si/no'),
-        created_date:get(row,'fecha de creacion'),
-        purchase_uom:get(row,'unidad de medida de compras'),
-        uom_type:get(row,'tipo unidad de medida'),
-        last_purchase_date:get(row,'ultima fecha de compra'),
-        last_currency:get(row,'ultima moneda de compra'),
-        last_purchase_price:parseFloat(get(row,'ultimo precio de compra'))||0,
-        last_set_price:parseFloat(get(row,'ultimo precio determinado'))||0,
-        production_cost:parseFloat(get(row,'costo estandar de produccion'))||0,
-        sales_uom:get(row,'unidad de medida de ventas'),
-        inventory_uom:get(row,'unidad de medida de inventario'),
-        product_class:get(row,'clasificacion de productos'),
-        foreign_name:get(row,'nombre extranjero'),
-        weight:parseFloat(get(row,'peso'))||0,
-        icon:'', section:'adicional',
-      };
-      const {error}=code
-        ?await sbClient.from('inventory').upsert(payload,{onConflict:'code'})
-        :await sbClient.from('inventory').insert(payload);
-      error?(err++,console.error(error)):ok++;
-    }
-  } else {
-    // Clientes
-    for (const row of rows) {
-      const nombre=get(row,'nombre sn','nombre','name');
-      if(!nombre){skip++;continue;}
-      const activo_raw=get(row,'activo','active').toLowerCase();
-      const activo = !['no','false','0'].includes(activo_raw); // default activo
-      const codigoSN=get(row,'codigo sn','codigo','code');
-      const ruc=cleanRUC(codigoSN);
-      const payload={
-        codigo_sn:codigoSN, ruc:ruc||null, nombre,
-        direccion:get(row,'direccion','address'),
-        ciudad:get(row,'ciudad','city'),
-        departamento:get(row,'departamente','departamento'),
-        fecha_creacion:get(row,'fecha de creacion'),
-        contacto:get(row,'contacto 1','contacto'),
-        telefono:get(row,'telefono','phone'),
+  const CHUNK = 500; // registros por lote
+  const table  = type === 'inv' ? 'inventory' : 'clients';
+  const conflict = type === 'inv' ? 'code' : 'ruc';
+  let ok = 0, skip = 0, errCount = 0;
+
+  /* ── Preparar todos los payloads primero ── */
+  const payloads = [];
+  for (const row of rows) {
+    if (type === 'inv') {
+      const name = get(row,'descripcion del articulo','descripcion','name');
+      if (!name) { skip++; continue; }
+      const inactive = get(row,'inactivo','inactive').toLowerCase();
+      if (['si','sí','y','yes','true','1'].includes(inactive)) { skip++; continue; }
+      const code  = get(row,'numero de articulo','code','codigo') || null;
+      const stock = Math.max(0, Math.round(parseFloat(get(row,'en stock','stock')) || 0));
+      payloads.push({
+        code, name, stock, available: stock, inactive: false,
+        stock_type:    get(row,'tipo existencia'),
+        item_group:    get(row,'grupo de articulos'),
+        sale_item:     get(row,'articulo venta'),
+        container:     get(row,'envase'),
+        warehouse:     get(row,'almacen predeterminado'),
+        segment:       get(row,'segmento'),
+        family:        get(row,'familia'),
+        class:         get(row,'clase'),
+        sunat_code:    get(row,'codigo sunat'),
+        has_lot:       get(row,'lote si/no'),
+        created_date:  get(row,'fecha de creacion'),
+        purchase_uom:  get(row,'unidad de medida de compras'),
+        uom_type:      get(row,'tipo unidad de medida'),
+        last_purchase_date:  get(row,'ultima fecha de compra'),
+        last_currency:       get(row,'ultima moneda de compra'),
+        last_purchase_price: parseFloat(get(row,'ultimo precio de compra'))  || 0,
+        last_set_price:      parseFloat(get(row,'ultimo precio determinado')) || 0,
+        production_cost:     parseFloat(get(row,'costo estandar de produccion')) || 0,
+        sales_uom:     get(row,'unidad de medida de ventas'),
+        inventory_uom: get(row,'unidad de medida de inventario'),
+        product_class: get(row,'clasificacion de productos'),
+        foreign_name:  get(row,'nombre extranjero'),
+        weight:        parseFloat(get(row,'peso')) || 0,
+        icon: '', section: 'adicional',
+      });
+    } else {
+      const nombre = get(row,'nombre sn','nombre','name');
+      if (!nombre) { skip++; continue; }
+      const activo_raw = get(row,'activo','active').toLowerCase();
+      const activo     = !['no','false','0'].includes(activo_raw);
+      const codigoSN   = get(row,'codigo sn','codigo','code');
+      const ruc        = cleanRUC(codigoSN) || null;
+      payloads.push({
+        codigo_sn: codigoSN, ruc, nombre,
+        direccion:    get(row,'direccion','address'),
+        ciudad:       get(row,'ciudad','city'),
+        departamento: get(row,'departamente','departamento'),
+        fecha_creacion: get(row,'fecha de creacion'),
+        contacto:     get(row,'contacto 1','contacto'),
+        telefono:     get(row,'telefono','phone'),
         activo,
-        saldo:parseFloat(get(row,'saldo de cuenta'))||0,
-        pais:get(row,'pais/region de destinatario de factura','pais'),
-        estado_dest:get(row,'destinatario de mercancias: estado'),
-        cod_postal:get(row,'destinatario de factura: codigo postal'),
-      };
-      const {error}=ruc
-        ?await sbClient.from('clients').upsert(payload,{onConflict:'ruc'})
-        :await sbClient.from('clients').insert(payload);
-      error?(err++,console.error(error)):ok++;
+        saldo:        parseFloat(get(row,'saldo de cuenta')) || 0,
+        pais:         get(row,'pais/region de destinatario de factura','pais'),
+        estado_dest:  get(row,'destinatario de mercancias: estado'),
+        cod_postal:   get(row,'destinatario de factura: codigo postal'),
+      });
     }
-    await fetchClients();
   }
 
+  const total  = payloads.length;
+  const chunks = Math.ceil(total / CHUNK);
+  showProgress(0, total, type);
+
+  /* ── Subir en lotes ── */
+  for (let i = 0; i < chunks; i++) {
+    const batch = payloads.slice(i * CHUNK, (i + 1) * CHUNK);
+
+    /* Separar registros con y sin clave de conflicto */
+    const withKey    = batch.filter(p => p[conflict]);
+    const withoutKey = batch.filter(p => !p[conflict]);
+
+    if (withKey.length) {
+      const { error } = await sbClient
+        .from(table)
+        .upsert(withKey, { onConflict: conflict, ignoreDuplicates: false });
+      if (error) { errCount += withKey.length; console.error('Batch upsert error:', error); }
+      else ok += withKey.length;
+    }
+    if (withoutKey.length) {
+      const { error } = await sbClient
+        .from(table)
+        .insert(withoutKey);
+      if (error) { errCount += withoutKey.length; console.error('Batch insert error:', error); }
+      else ok += withoutKey.length;
+    }
+
+    updateProgress((i + 1) * CHUNK > total ? total : (i + 1) * CHUNK, total, type);
+
+    /* pequeña pausa para no saturar la conexión */
+    if (i < chunks - 1) await sleep(120);
+  }
+
+  hideProgress(type);
   noLoad();
-  toast(`${ok} actualizados · ${skip} omitidos${err?` · ${err} errores`:''}`,ok>0?'ok':'err');
+
+  const label = type === 'inv' ? 'registros de inventario' : 'clientes';
+  toast(
+    `${ok} ${label} actualizados · ${skip} omitidos${errCount ? ` · ⚠ ${errCount} errores` : ''}`,
+    ok > 0 ? 'ok' : 'err'
+  );
+
   cancelPrev(type);
-  if(type==='inv') await loadInv();
-  else loadClients();
+  if (type === 'inv') { await loadInv(); }
+  else { await fetchClients(); loadClients(); }
+}
+
+/* ── helpers ── */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function showProgress(done, total, type) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const existing = document.getElementById(`prog-${type}`);
+  if (existing) { existing.remove(); }
+  const el = document.createElement('div');
+  el.id = `prog-${type}`;
+  el.innerHTML = `
+    <div style="margin-top:1rem;background:var(--c-surface2);border:1px solid var(--c-border);border-radius:var(--radius-sm);padding:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+        <span style="font-size:.78rem;font-weight:600;color:var(--c-text2)">Subiendo registros...</span>
+        <span id="prog-${type}-pct" style="font-family:'DM Mono',monospace;font-size:.78rem;color:var(--c-orange)">${pct}%</span>
+      </div>
+      <div style="background:var(--c-surface3);border-radius:4px;height:6px;overflow:hidden">
+        <div id="prog-${type}-bar" style="height:100%;background:var(--c-orange);border-radius:4px;transition:width .3s ease;width:${pct}%"></div>
+      </div>
+      <div id="prog-${type}-lbl" style="font-size:.71rem;color:var(--c-text3);margin-top:.4rem">${done} / ${total} registros</div>
+    </div>`;
+  const prev = document.getElementById(`prev-${type}`);
+  if (prev) prev.appendChild(el);
+}
+
+function updateProgress(done, total, type) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const bar = document.getElementById(`prog-${type}-bar`);
+  const pctEl = document.getElementById(`prog-${type}-pct`);
+  const lbl = document.getElementById(`prog-${type}-lbl`);
+  if (bar) bar.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (lbl) lbl.textContent = `${done} / ${total} registros`;
+}
+
+function hideProgress(type) {
+  const el = document.getElementById(`prog-${type}`);
+  if (el) el.remove();
 }
 
 function downloadTemplate(type) {
