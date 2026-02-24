@@ -378,7 +378,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="login-title">Acceso Almacén</div>
     <div class="login-sub">Ingresa con tu cuenta autorizada</div>
     <div id="login-config-warn" class="config-banner" style="display:none">
-      ⚠️ Configura SUPABASE_URL y SUPABASE_ANON_KEY en el código antes de continuar
+      ⚠️ Sin conexión a base de datos configurada
     </div>
     <div class="form-group">
       <label class="form-label">Correo electrónico</label>
@@ -411,7 +411,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </header>
   <div class="main-content">
     <div id="emp-config-warn" class="config-banner" style="display:none">
-      ⚠️ Sin conexión a base de datos. Configura Supabase para guardar solicitudes.
+      ⚠️ Sin conexión a base de datos
     </div>
     <div class="solicitud-header">
       <div class="solicitud-title">Nueva Solicitud</div>
@@ -651,11 +651,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
 // ═══════════════════════════════
 // SUPABASE CONFIG
 // ════ REEMPLAZA ESTOS VALORES ════
-const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
-const SUPABASE_ANON_KEY = 'TU_ANON_KEY_AQUI';
+const SUPABASE_URL = 'https://lbkmsklbgcqyphqctutk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxia21za2xiZ2NxeXBocWN0dXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyMzc1ODYsImV4cCI6MjA4MzgxMzU4Nn0.dn8CkNkKZWvb9ILAh2jvm4JQn5svCfNpIw4DYCedyAM';
 // ════════════════════════════════
 
-let supabase = null;
+let sbClient = null;
 let isSupabaseConfigured = false;
 let inventory = [];
 let cart = {};         // itemId -> {item, qty}
@@ -676,10 +676,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // Try init Supabase
   if (SUPABASE_URL !== 'https://TU-PROYECTO.supabase.co' && SUPABASE_ANON_KEY !== 'TU_ANON_KEY_AQUI') {
     try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       isSupabaseConfigured = true;
+      console.log('✅ Supabase conectado:', SUPABASE_URL);
       // Check if already logged in
-      supabase.auth.getSession().then(({data:{session}}) => {
+      sbClient.auth.getSession().then(({data:{session}}) => {
         if (session) enterAdmin(session.user);
       });
     } catch(e) { console.warn('Supabase init error:', e); }
@@ -715,7 +716,7 @@ async function doLogin() {
   if (!isSupabaseConfigured) { toast('Supabase no configurado','error'); return; }
 
   showLoading('Autenticando...');
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pass });
   hideLoading();
   if (error) { toast('Credenciales incorrectas','error'); return; }
   enterAdmin(data.user);
@@ -729,7 +730,7 @@ async function enterAdmin(user) {
 }
 
 async function doLogout() {
-  if (isSupabaseConfigured) await supabase.auth.signOut();
+  if (isSupabaseConfigured) await sbClient.auth.signOut();
   showScreen('screen-landing');
 }
 
@@ -740,13 +741,24 @@ async function fetchInventory() {
     return;
   }
   try {
-    const { data, error } = await supabase.from('inventory').select('*').order('name');
-    if (error) throw error;
+    const { data, error } = await sbClient.from('inventory').select('*').order('name');
+    if (error) {
+      const msg = error?.message || error?.details || JSON.stringify(error);
+      console.warn('fetchInventory Supabase error:', msg);
+      // Tabla no existe aún — esperar a que se ejecute el schema
+      if (msg.includes('does not exist') || msg.includes('relation')) {
+        toast('⚠️ Ejecuta el schema SQL en Supabase primero', 'error');
+      } else {
+        toast('Error inventario: ' + msg, 'error');
+      }
+      inventory = [];
+      return;
+    }
     inventory = data || [];
-    if (inventory.length === 0) inventory = getDefaultInventory();
   } catch(e) {
-    console.warn('fetchInventory error:', e);
-    inventory = getDefaultInventory();
+    const msg = e?.message || e?.details || JSON.stringify(e);
+    console.warn('fetchInventory error:', msg);
+    inventory = [];
   }
 }
 
@@ -923,7 +935,7 @@ function buildSummary() {
 async function updateReqNumber() {
   if (isSupabaseConfigured) {
     try {
-      const { count } = await supabase.from('loan_requests').select('*',{count:'exact',head:true});
+      const { count } = await sbClient.from('loan_requests').select('*',{count:'exact',head:true});
       reqCounter = (count||0) + 1;
     } catch(e) {}
   }
@@ -967,10 +979,10 @@ async function submitRequest() {
   if (isSupabaseConfigured) {
     showLoading('Enviando solicitud...');
     try {
-      const { data: req, error: reqErr } = await supabase.from('loan_requests').insert(reqData).select().single();
+      const { data: req, error: reqErr } = await sbClient.from('loan_requests').insert(reqData).select().single();
       if (reqErr) throw reqErr;
       const items = itemsData.map(i => ({...i, request_id: req.id}));
-      const { error: itemErr } = await supabase.from('loan_items').insert(items);
+      const { error: itemErr } = await sbClient.from('loan_items').insert(items);
       if (itemErr) throw itemErr;
       hideLoading();
       toast('✅ Solicitud enviada correctamente','success');
@@ -1200,11 +1212,16 @@ async function loadRequests() {
   const statusFilter = document.getElementById('filter-status')?.value;
   const searchFilter = document.getElementById('filter-search')?.value?.toLowerCase();
   
-  let query = supabase.from('loan_requests').select('*, loan_items(*)').order('created_at',{ascending:false});
+  let query = sbClient.from('loan_requests').select('*, loan_items(*)').order('created_at',{ascending:false});
   if (statusFilter) query = query.eq('status', statusFilter);
   
   const { data, error } = await query;
-  if (error) { toast('Error cargando solicitudes','error'); return; }
+  if (error) {
+    const msg = error?.message || error?.details || JSON.stringify(error);
+    toast('Error solicitudes: ' + msg, 'error');
+    console.warn('loadRequests error:', msg);
+    return;
+  }
   
   let rows = data || [];
   if (searchFilter) {
@@ -1293,7 +1310,7 @@ async function openRequestModal(id) {
 }
 
 async function changeStatus(id, status) {
-  const { error } = await supabase.from('loan_requests').update({status}).eq('id',id);
+  const { error } = await sbClient.from('loan_requests').update({status}).eq('id',id);
   if (error) { toast('Error','error'); return; }
   toast(`Estado → ${status}`,'success');
   await loadRequests();
@@ -1303,7 +1320,7 @@ async function changeStatus(id, status) {
 async function saveObservations(id) {
   const obs_entrega = document.getElementById('modal-obs-entrega').value;
   const obs_retorno = document.getElementById('modal-obs-retorno').value;
-  const { error } = await supabase.from('loan_requests').update({obs_entrega,obs_retorno}).eq('id',id);
+  const { error } = await sbClient.from('loan_requests').update({obs_entrega,obs_retorno}).eq('id',id);
   if (error) { toast('Error','error'); return; }
   toast('Guardado','success');
   await loadRequests();
@@ -1312,7 +1329,7 @@ async function saveObservations(id) {
 
 async function deleteRequest(id) {
   if (!confirm('¿Eliminar esta solicitud? No se puede deshacer.')) return;
-  const { error } = await supabase.from('loan_requests').delete().eq('id',id);
+  const { error } = await sbClient.from('loan_requests').delete().eq('id',id);
   if (error) { toast('Error al eliminar','error'); return; }
   toast('Solicitud eliminada','success');
   await loadRequests();
@@ -1391,9 +1408,9 @@ async function saveInvItem(id) {
   
   let error;
   if (id) {
-    ({error} = await supabase.from('inventory').update(payload).eq('id',id));
+    ({error} = await sbClient.from('inventory').update(payload).eq('id',id));
   } else {
-    ({error} = await supabase.from('inventory').insert(payload));
+    ({error} = await sbClient.from('inventory').insert(payload));
   }
   if (error) { toast('Error: '+error.message,'error'); return; }
   toast(id?'Actualizado':'Creado','success');
@@ -1403,7 +1420,7 @@ async function saveInvItem(id) {
 
 async function deleteInvItem(id) {
   if (!confirm('¿Eliminar este item del inventario?')) return;
-  const { error } = await supabase.from('inventory').delete().eq('id',id);
+  const { error } = await sbClient.from('inventory').delete().eq('id',id);
   if (error) { toast('Error','error'); return; }
   toast('Eliminado','success');
   await loadInventory();
@@ -1518,10 +1535,10 @@ async function confirmExcelUpload() {
     };
 
     if (code) {
-      const {error} = await supabase.from('inventory').upsert(payload, {onConflict:'code'});
+      const {error} = await sbClient.from('inventory').upsert(payload, {onConflict:'code'});
       error ? (err++, console.error(error)) : ok++;
     } else {
-      const {error} = await supabase.from('inventory').insert(payload);
+      const {error} = await sbClient.from('inventory').insert(payload);
       error ? (err++, console.error(error)) : ok++;
     }
   }
