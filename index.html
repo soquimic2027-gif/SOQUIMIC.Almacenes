@@ -1028,29 +1028,50 @@ let solicitantes = [];
 let conductores  = [];
 
 async function fetchSolicitantes() {
-  if (!isSB) { solicitantes = []; return; }
+  if (!isSB) { solicitantes = []; conductores = []; return; }
   try {
-    const { data, error } = await sbClient
+    // Intentar con columnas de conductor primero
+    let { data, error } = await sbClient
       .from('loan_requests')
       .select('solicitante,dni,cargo,area,conductor_nombre,conductor_licencia')
-      .order('created_at', {ascending: false});
-    if (error || !data) { solicitantes = []; return; }
-    /* deduplicate by DNI */
+      .order('created_at', {ascending: false})
+      .limit(500);
+
+    // Si falla (columnas no existen aún), intentar solo columnas base
+    if (error) {
+      const fallback = await sbClient
+        .from('loan_requests')
+        .select('solicitante,dni,cargo,area')
+        .order('created_at', {ascending: false})
+        .limit(500);
+      if (fallback.error || !fallback.data) { solicitantes = []; conductores = []; return; }
+      data = fallback.data;
+    }
+
     const seen = new Set();
+    const seenDrv = new Set();
     solicitantes = [];
     conductores  = [];
-    const seenDrv = new Set();
-    data.forEach(r => {
+
+    (data || []).forEach(r => {
       if (r.dni && !seen.has(r.dni)) {
         seen.add(r.dni);
-        solicitantes.push({ nombre: r.solicitante, dni: r.dni, cargo: r.cargo||'', area: r.area||'' });
+        solicitantes.push({
+          nombre: r.solicitante || '',
+          dni:    r.dni || '',
+          cargo:  r.cargo || '',
+          area:   r.area  || ''
+        });
       }
       if (r.conductor_nombre && !seenDrv.has(r.conductor_nombre)) {
         seenDrv.add(r.conductor_nombre);
-        conductores.push({ nombre: r.conductor_nombre, licencia: r.conductor_licencia||'' });
+        conductores.push({ nombre: r.conductor_nombre, licencia: r.conductor_licencia || '' });
       }
     });
-  } catch(e) { solicitantes = []; }
+  } catch(e) {
+    console.warn('fetchSolicitantes error (no critico):', e.message);
+    solicitantes = []; conductores = [];
+  }
 }
 
 /* ─── UNIVERSAL AUTOCOMPLETE ENGINE ─────────────────────────────────────── */
@@ -1070,7 +1091,7 @@ function acSearch(type, field, query) {
         : s.nombre.toLowerCase().includes(q)
     ).slice(0, 8);
 
-    if (!matches.length) { dd.innerHTML = '<div class="ac-empty">Sin coincidencias en el historial</div>'; dd.classList.add('open'); return; }
+    if (!matches.length) { dd.classList.remove('open'); return; }
 
     dd.innerHTML = matches.map(s => `
       <div class="ac-item" onclick="selectSolicitante(${JSON.stringify(s).replace(/"/g,'&quot;')})">
