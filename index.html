@@ -1029,6 +1029,11 @@ let conductores  = [];
 
 async function fetchSolicitantes() {
   if (!isSB) { solicitantes = []; conductores = []; return; }
+  // Solo ejecutar si hay sesión activa (admin) — empleados no tienen permiso de lectura
+  try {
+    const { data: { session } } = await sbClient.auth.getSession();
+    if (!session) { solicitantes = []; conductores = []; return; }
+  } catch(e) { solicitantes = []; conductores = []; return; }
   try {
     // Intentar con columnas de conductor primero
     let { data, error } = await sbClient
