@@ -478,31 +478,36 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
           <div class="form-group">
             <label class="label">Nombre completo <span class="req">*</span></label>
             <div class="autocomplete-wrap">
-              <input class="input" id="s1-nombre" placeholder="Ej: Juan Perez Garcia"
-                     oninput="acSearch('sol','nombre',this.value)" autocomplete="off">
+              <input class="input" id="s1-nombre" placeholder="Escribe tu nombre para buscar..."
+                     oninput="searchSolicitante(this.value)" autocomplete="off">
               <div class="autocomplete-dropdown" id="ac-sol-nombre"></div>
             </div>
-            <div class="field-error" id="e-nombre">Ingresa tu nombre completo (min. 3 caracteres)</div>
+            <div class="field-error" id="e-nombre">Selecciona o ingresa tu nombre (min. 3 caracteres)</div>
           </div>
           <div class="form-group">
-            <label class="label">DNI <span class="req">*</span></label>
-            <div class="autocomplete-wrap">
-              <input class="input" id="s1-dni" placeholder="12345678" maxlength="8"
-                     oninput="this.value=this.value.replace(/[^0-9]/g,'');acSearch('sol','dni',this.value)"
-                     autocomplete="off">
-              <div class="autocomplete-dropdown" id="ac-sol-dni"></div>
-            </div>
-            <div class="field-error" id="e-dni">El DNI debe tener 8 digitos</div>
+            <label class="label">Codigo SN / DNI <span class="req">*</span></label>
+            <input class="input" id="s1-dni" placeholder="Solo numeros" maxlength="12"
+                   oninput="this.value=this.value.replace(/[^0-9]/g,'')" autocomplete="off" readonly>
+            <div class="field-error" id="e-dni">El codigo es requerido</div>
           </div>
           <div class="form-group">
-            <label class="label">Cargo / Puesto <span class="req">*</span></label>
-            <input class="input" id="s1-cargo" placeholder="Ej: Tecnico de laboratorio">
-            <div class="field-error" id="e-cargo">Ingresa tu cargo</div>
+            <label class="label">Cargo <span class="req">*</span></label>
+            <select class="select" id="s1-cargo">
+              <option value="">-- Selecciona tu cargo --</option>
+              <option value="COORDINADOR COMERCIAL">COORDINADOR COMERCIAL</option>
+              <option value="ASESOR COMERCIAL">ASESOR COMERCIAL</option>
+              <option value="TECNICO COMERCIAL">TECNICO COMERCIAL</option>
+            </select>
+            <div class="field-error" id="e-cargo">Selecciona tu cargo</div>
           </div>
           <div class="form-group">
             <label class="label">Area <span class="req">*</span></label>
-            <input class="input" id="s1-area" placeholder="Ej: Laboratorio, Shotcrete">
-            <div class="field-error" id="e-area">Ingresa tu area</div>
+            <select class="select" id="s1-area">
+              <option value="">-- Selecciona tu area --</option>
+              <option value="AREA COMERCIAL">AREA COMERCIAL</option>
+              <option value="AREA DE CALIDAD">AREA DE CALIDAD</option>
+            </select>
+            <div class="field-error" id="e-area">Selecciona tu area</div>
           </div>
           <div class="form-group">
             <label class="label">Fecha de prestamo <span class="req">*</span></label>
@@ -528,19 +533,15 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
               <div class="form-group" style="margin-bottom:0">
                 <label class="label">Nombre del conductor <span class="req">*</span></label>
                 <div class="autocomplete-wrap">
-                  <input class="input" id="s1-conductor" placeholder="Nombre completo del conductor"
-                         oninput="acSearch('drv','nombre',this.value)" autocomplete="off">
+                  <input class="input" id="s1-conductor" placeholder="Escribe el nombre para buscar..."
+                         oninput="searchConductor(this.value)" autocomplete="off">
                   <div class="autocomplete-dropdown" id="ac-drv-nombre"></div>
                 </div>
                 <div class="field-error" id="e-conductor">Ingresa el nombre del conductor</div>
               </div>
               <div class="form-group" style="margin-bottom:0">
                 <label class="label">Licencia del conductor <span class="req">*</span></label>
-                <div class="autocomplete-wrap">
-                  <input class="input" id="s1-licencia" placeholder="N° de licencia de conducir"
-                         oninput="acSearch('drv','licencia',this.value)" autocomplete="off">
-                  <div class="autocomplete-dropdown" id="ac-drv-licencia"></div>
-                </div>
+                <input class="input" id="s1-licencia" placeholder="N° de licencia de conducir" autocomplete="off">
                 <div class="field-error" id="e-licencia">Ingresa el numero de licencia</div>
               </div>
             </div>
@@ -706,7 +707,7 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
       </div>
       <div class="tbl-wrap">
         <table><thead><tr>
-          <th>Codigo</th><th>Descripcion</th><th>Seccion</th><th>Familia</th><th>Stock</th><th>Disponible</th><th>Acciones</th>
+          <th>Codigo</th><th>Equipo / Herramienta</th><th>Categoria</th><th>Cantidad</th><th>Acciones</th>
         </tr></thead>
         <tbody id="inv-tbody"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--c-text3)">Cargando...</td></tr></tbody>
         </table>
@@ -821,10 +822,44 @@ let currentStep = 1;
 let selectedClient = null;
 
 const SECTIONS = {
-  diseno:'Diseno de Mezcla', slump:'Ensayo de Slump', fragua:'Ensayo de Fragua',
-  shotcrete:'Shotcrete / Pull Out', humedad:'Humedad / Granulometria',
-  muestras:'Toma de Muestras', adicional:'Adicionales'
+  diseno:   'DISEÑO DE MEZCLA o PRUEBA IND.',
+  slump:    'ENS. DE SLUMP, CONT. DE AIRE Y MUESTREO',
+  fragua:   'ENSAYO DE FRAGUA',
+  shotcrete:'MOLDEO PANELES DE SHOTCRETE Y VIGAS',
+  humedad:  'HUMEDAD, GRANULOMETRIA, PES. ESPECIFICO...',
+  adicional:'ADICIONAL'
 };
+
+/* mapa de nombre largo → clave interna para el import */
+const SECTION_MAP = {
+  'diseño de mezcla o prueba ind.':       'diseno',
+  'diseno de mezcla o prueba ind.':       'diseno',
+  'diseño de mezcla':                     'diseno',
+  'ens. de slump, cont. de aire y muestreo': 'slump',
+  'ensayo de slump':                      'slump',
+  'slump':                                'slump',
+  'ensayo de fragua':                     'fragua',
+  'fragua':                               'fragua',
+  'moldeo paneles de shotcrete y vigas':  'shotcrete',
+  'shotcrete':                            'shotcrete',
+  'pull out':                             'shotcrete',
+  'humedad, granulometria, pes. especifico...': 'humedad',
+  'humedad, granulometría, pes. específico...': 'humedad',
+  'humedad':                              'humedad',
+  'granulometria':                        'humedad',
+  'adicional':                            'adicional',
+  'adicionales':                          'adicional',
+};
+function resolveSection(raw) {
+  if (!raw) return 'adicional';
+  const key = raw.toString().toLowerCase().trim()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'');
+  for (const [k,v] of Object.entries(SECTION_MAP)) {
+    const nk = k.normalize('NFD').replace(/[̀-ͯ]/g,'');
+    if (key.includes(nk) || nk.includes(key)) return v;
+  }
+  return 'adicional';
+}
 
 /* ─── UTILS ─────────────────────────── */
 function cleanRUC(codigoSN) {
@@ -914,14 +949,27 @@ function toggleConductor() {
 async function fetchInventory() {
   if (!isSB) { inventory = []; return; }
   try {
-    const { data, error } = await sbClient.from('inventory').select('*').order('name');
+    const { data, error } = await sbClient
+      .from('inventory')
+      .select('id,codigo,categoria,nombre,cantidad')
+      .order('categoria')
+      .order('nombre');
     if (error) {
       const msg = error?.message||JSON.stringify(error);
       if (msg.includes('does not exist')) toast('Ejecuta primero el schema SQL en Supabase','err');
       else toast('Error inventario: '+msg,'err');
       inventory = []; return;
     }
-    inventory = data||[];
+    // Normalizar: mapear columnas nuevas a nombres internos usados por la app
+    inventory = (data||[]).map(i => ({
+      ...i,
+      name:      i.nombre,
+      code:      i.codigo || '',
+      stock:     i.cantidad,
+      available: i.cantidad,
+      section:   resolveSection(i.categoria),
+      inactive:  false,
+    }));
   } catch(e) { inventory = []; }
 }
 
@@ -943,7 +991,7 @@ function renderInv() {
   const CHK_SVG = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>';
 
   let html = '';
-  ['diseno','slump','fragua','shotcrete','humedad','muestras','adicional'].forEach(sec => {
+  ['diseno','slump','fragua','shotcrete','humedad','adicional'].forEach(sec => {
     if (!bySec[sec]) return;
     html += `<div class="section-sep">${SECTIONS[sec]||sec}</div><div class="inv-grid">`;
     bySec[sec].forEach(item => {
@@ -1079,78 +1127,66 @@ async function fetchSolicitantes() {
   }
 }
 
-/* ─── UNIVERSAL AUTOCOMPLETE ENGINE ─────────────────────────────────────── */
-function acSearch(type, field, query) {
-  const ddId = `ac-${type}-${field}`;
-  const dd = document.getElementById(ddId);
-  if (!dd) return;
-  const q = query.trim().toLowerCase();
-  if (!q || q.length < 1) { dd.classList.remove('open'); return; }
+/* ─── AUTOCOMPLETE: SOLICITANTE desde tabla clients ─────────────────────── */
+function searchSolicitante(q) {
+  const dd = document.getElementById('ac-sol-nombre');
+  if (!q || q.length < 2) { dd.classList.remove('open'); return; }
+  const term = q.toLowerCase();
+  const matches = clients.filter(c =>
+    c.nombre?.toLowerCase().includes(term)
+  ).slice(0, 10);
 
-  let matches = [];
+  if (!matches.length) { dd.classList.remove('open'); return; }
 
-  if (type === 'sol') {
-    matches = solicitantes.filter(s =>
-      field === 'dni'
-        ? s.dni.startsWith(q)
-        : s.nombre.toLowerCase().includes(q)
-    ).slice(0, 8);
-
-    if (!matches.length) { dd.classList.remove('open'); return; }
-
-    dd.innerHTML = matches.map(s => `
-      <div class="ac-item" onclick="selectSolicitante(${JSON.stringify(s).replace(/"/g,'&quot;')})">
-        <div class="ac-name">${s.nombre}</div>
-        <div style="display:flex;gap:.75rem">
-          <div class="ac-ruc">DNI: ${s.dni}</div>
-          ${s.cargo ? `<div class="ac-city">${s.cargo}</div>` : ''}
-          ${s.area  ? `<div class="ac-city">— ${s.area}</div>` : ''}
-        </div>
-      </div>`).join('');
-
-  } else if (type === 'drv') {
-    matches = conductores.filter(d =>
-      field === 'licencia'
-        ? d.licencia.toLowerCase().includes(q)
-        : d.nombre.toLowerCase().includes(q)
-    ).slice(0, 8);
-
-    if (!matches.length) { dd.classList.remove('open'); return; }
-
-    dd.innerHTML = matches.map(d => `
-      <div class="ac-item" onclick="selectConductor(${JSON.stringify(d).replace(/"/g,'&quot;')})">
-        <div class="ac-name">${d.nombre}</div>
-        ${d.licencia ? `<div class="ac-ruc">Licencia: ${d.licencia}</div>` : ''}
-      </div>`).join('');
-  }
-
+  dd.innerHTML = matches.map(cli => `
+    <div class="ac-item" onclick="selectSolicitante(${JSON.stringify(cli).replace(/"/g,'&quot;')})">
+      <div class="ac-name">${cli.nombre}</div>
+      <div style="display:flex;gap:.75rem">
+        <div class="ac-ruc">SN: ${cli.codigo_sn||'—'}</div>
+        ${cli.ciudad ? `<div class="ac-city">${cli.ciudad}</div>` : ''}
+      </div>
+    </div>`).join('');
   dd.classList.add('open');
 }
 
-function selectSolicitante(s) {
-  document.getElementById('s1-nombre').value = s.nombre;
-  document.getElementById('s1-dni').value    = s.dni;
-  document.getElementById('s1-cargo').value  = s.cargo;
-  document.getElementById('s1-area').value   = s.area;
-  /* clear errors */
-  ['s1-nombre','s1-dni','s1-cargo','s1-area'].forEach(id => {
-    document.getElementById(id)?.classList.remove('error');
-  });
-  ['e-nombre','e-dni','e-cargo','e-area'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.style.display = 'none';
-  });
+function selectSolicitante(cli) {
+  document.getElementById('s1-nombre').value = cli.nombre;
+  // DNI = solo digitos del codigo_sn
+  const dniNum = (cli.codigo_sn || cli.ruc || '').replace(/[^0-9]/g, '');
+  document.getElementById('s1-dni').value = dniNum;
+  // Limpiar errores
+  ['s1-nombre','s1-dni'].forEach(id => document.getElementById(id)?.classList.remove('error'));
+  ['e-nombre','e-dni'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   closeAllAC();
 }
 
-function selectConductor(d) {
-  document.getElementById('s1-conductor').value = d.nombre;
-  document.getElementById('s1-licencia').value  = d.licencia;
-  ['e-conductor','e-licencia'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.style.display = 'none';
-  });
-  ['s1-conductor','s1-licencia'].forEach(id => {
-    document.getElementById(id)?.classList.remove('error');
-  });
+/* ─── AUTOCOMPLETE: CONDUCTOR desde tabla clients ────────────────────────── */
+function searchConductor(q) {
+  const dd = document.getElementById('ac-drv-nombre');
+  if (!q || q.length < 2) { dd.classList.remove('open'); return; }
+  const term = q.toLowerCase();
+  const matches = clients.filter(c =>
+    c.nombre?.toLowerCase().includes(term)
+  ).slice(0, 10);
+
+  if (!matches.length) { dd.classList.remove('open'); return; }
+
+  dd.innerHTML = matches.map(cli => `
+    <div class="ac-item" onclick="selectConductor(${JSON.stringify(cli).replace(/"/g,'&quot;')})">
+      <div class="ac-name">${cli.nombre}</div>
+      <div style="display:flex;gap:.75rem">
+        <div class="ac-ruc">SN: ${cli.codigo_sn||'—'}</div>
+        ${cli.ciudad ? `<div class="ac-city">${cli.ciudad}</div>` : ''}
+      </div>
+    </div>`).join('');
+  dd.classList.add('open');
+}
+
+function selectConductor(cli) {
+  document.getElementById('s1-conductor').value = cli.nombre;
+  // Licencia la ingresa manualmente — solo limpiamos errores
+  ['s1-conductor'].forEach(id => document.getElementById(id)?.classList.remove('error'));
+  ['e-conductor'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   closeAllAC();
 }
 
@@ -1190,13 +1226,14 @@ function searchClients(q, source='nombre') {
 
 function selectClient(cli) {
   selectedClient = cli;
+  // RUC = codigo_sn solo numeros (quitar letras iniciales)
+  const rucNum = (cli.codigo_sn || cli.ruc || '').replace(/[^0-9]/g, '');
   document.getElementById('s2-busqueda').value = cli.nombre;
-  document.getElementById('s2-ruc').value    = cli.ruc||'';
+  document.getElementById('s2-ruc').value    = rucNum;
   document.getElementById('s2-ciudad').value = cli.ciudad||'';
   document.getElementById('s2-dir').value    = cli.direccion||'';
-  document.getElementById('client-tag-text').textContent = cli.nombre + (cli.ruc?' — RUC: '+cli.ruc:'');
+  document.getElementById('client-tag-text').textContent = cli.nombre + (rucNum?' — RUC: '+rucNum:'');
   document.getElementById('client-tag-wrap').style.display = 'block';
-  /* close all client dropdowns */
   document.getElementById('ac-dropdown')?.classList.remove('open');
   document.getElementById('ac-cli-ruc')?.classList.remove('open');
   document.getElementById('e-cliente').style.display = 'none';
@@ -1244,9 +1281,9 @@ function validateStep1() {
   let ok = true;
   const checks = [
     [document.getElementById('s1-nombre').value.trim().length>=3, 's1-nombre','e-nombre'],
-    [/^\d{8}$/.test(document.getElementById('s1-dni').value.trim()), 's1-dni','e-dni'],
-    [document.getElementById('s1-cargo').value.trim().length>=2, 's1-cargo','e-cargo'],
-    [document.getElementById('s1-area').value.trim().length>=2, 's1-area','e-area'],
+    [document.getElementById('s1-dni').value.trim().length >= 8, 's1-dni','e-dni'],
+    [document.getElementById('s1-cargo').value !== '', 's1-cargo','e-cargo'],
+    [document.getElementById('s1-area').value !== '', 's1-area','e-area'],
     [!!document.getElementById('s1-fprestamo').value, 's1-fprestamo','e-fprestamo'],
     [!!document.getElementById('s1-fretorno').value, 's1-fretorno','e-fretorno'],
   ];
@@ -1422,8 +1459,10 @@ function previewPrint() {
 function resetEmployee() {
   fetchSolicitantes(); /* refresh cache with new requester */
   cart = {}; reqCounter++;
-  ['s1-nombre','s1-dni','s1-cargo','s1-area','s2-busqueda','s2-ruc','s2-ciudad','s2-dir','s2-proyecto',
+  ['s1-nombre','s1-dni','s2-busqueda','s2-ruc','s2-ciudad','s2-dir','s2-proyecto',
    's1-conductor','s1-licencia'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('s1-cargo').value = '';
+  document.getElementById('s1-area').value  = '';
   document.getElementById('chk-conductor').checked = false;
   toggleConductor();
   document.querySelectorAll('.input.error').forEach(el=>el.classList.remove('error'));
@@ -1439,7 +1478,7 @@ function printForm(req) {
   const today = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
   const items = req.items||[];
   const bySec={};
-  ['diseno','slump','fragua','shotcrete','humedad','muestras','adicional'].forEach(s=>bySec[s]=[]);
+  ['diseno','slump','fragua','shotcrete','humedad','adicional'].forEach(s=>bySec[s]=[]);
   items.forEach(i=>(bySec[i.section||'adicional']||bySec['adicional']).push(i));
   const invBySec={};
   inventory.forEach(i=>{const s=i.section||'adicional';if(!invBySec[s])invBySec[s]=[];invBySec[s].push(i)});
@@ -1499,27 +1538,25 @@ function printForm(req) {
     <div class="pf-sec-hdr">Seccion 3 — Equipos Solicitados</div>
     <div class="pf-eq-grid">
       <div class="pf-col">
-        <div class="pf-col-hdr">Diseno de Mezcla</div>
+        <div class="pf-col-hdr">Diseño de Mezcla o Prueba Ind.</div>
         <div class="pf-eq-row" style="background:#f5f5f5;font-weight:700;font-size:6pt"><div class="pf-q">Cant</div><div class="pf-n">Item</div><div class="pf-c">V/</div></div>
         ${eqRows('diseno')}
       </div>
       <div class="pf-col">
-        <div class="pf-col-hdr">Ensayo de Slump</div>
+        <div class="pf-col-hdr">Ens. Slump, Cont. Aire y Muestreo</div>
         <div class="pf-eq-row" style="background:#f5f5f5;font-weight:700;font-size:6pt"><div class="pf-q">Cant</div><div class="pf-n">Item</div><div class="pf-c">V/</div></div>
         ${eqRows('slump')}
         <div class="pf-col-subhdr">Ensayo de Fragua</div>
         ${eqRows('fragua')}
-        <div class="pf-col-subhdr">Shotcrete / Pull Out</div>
+        <div class="pf-col-subhdr">Moldeo Paneles Shotcrete y Vigas</div>
         ${eqRows('shotcrete')}
-        <div class="pf-adic-hdr">Adicionales</div>
+        <div class="pf-adic-hdr">Adicional</div>
         ${adicRows()}
       </div>
       <div class="pf-col">
-        <div class="pf-col-hdr">Humedad / Granulometria</div>
+        <div class="pf-col-hdr">Humedad, Granulometria, Pes. Esp.</div>
         <div class="pf-eq-row" style="background:#f5f5f5;font-weight:700;font-size:6pt"><div class="pf-q">Cant</div><div class="pf-n">Item</div><div class="pf-c">V/</div></div>
         ${eqRows('humedad')}
-        <div class="pf-col-subhdr">Toma de Muestras</div>
-        ${eqRows('muestras')}
       </div>
     </div>
     <div class="pf-sig-grid">
@@ -1673,15 +1710,12 @@ async function loadInv() {
   if(q) items=items.filter(i=>i.name?.toLowerCase().includes(q)||(i.code||'').toLowerCase().includes(q));
   const BOX='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
   document.getElementById('inv-tbody').innerHTML=items.map(item=>{
-    const av=item.available??item.stock??0;
-    const color=av<=0?'var(--c-red)':av<=2?'var(--c-yellow)':'var(--c-green)';
+    const qty=item.cantidad??item.stock??0;
+    const color=qty<=0?'var(--c-red)':qty<=2?'var(--c-yellow)':'var(--c-green)';
     return `<tr>
-      <td style="font-family:'DM Mono',monospace;font-size:.71rem">${item.code||'—'}</td>
-      <td>${BOX} ${item.name}</td>
-      <td style="font-size:.74rem;color:var(--c-text3)">${item.section||'—'}</td>
-      <td style="font-size:.74rem;color:var(--c-text2)">${item.family||'—'}</td>
-      <td style="font-family:'DM Mono',monospace">${item.stock??0}</td>
-      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${color}">${av}</td>
+      <td>${BOX} ${item.nombre||item.name}</td>
+      <td style="font-size:.73rem;color:var(--c-text3)">${item.categoria||item.section||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${color}">${qty}</td>
       <td><div style="display:flex;gap:.3rem">
         <button class="btn btn-outline btn-xs" onclick="openInvModal('${item.id}')">Editar</button>
         <button class="btn btn-danger btn-xs" onclick="delInv('${item.id}')">x</button>
@@ -1693,15 +1727,14 @@ async function loadInv() {
 function openInvModal(id) {
   const item=id?inventory.find(i=>i.id===id):null;
   document.getElementById('modal-inv-title').textContent=item?'Editar item':'Nuevo item';
-  const secs=['diseno','slump','fragua','shotcrete','humedad','muestras','adicional'];
+  const catOpts = Object.entries(SECTIONS).map(([k,v])=>`<option value="${v}"${(item?.categoria||'')=== v?' selected':''}>${v}</option>`).join('');
   document.getElementById('modal-inv-body').innerHTML=`
     <div class="g2">
-      <div class="form-group"><label class="label">Codigo</label><input class="input" id="ii-code" value="${item?.code||''}"></div>
-      <div class="form-group"><label class="label">Nombre <span class="req">*</span></label><input class="input" id="ii-name" value="${item?.name||''}"></div>
-      <div class="form-group"><label class="label">Seccion</label>
-        <select class="select" id="ii-sec">${secs.map(s=>`<option value="${s}"${item?.section===s?' selected':''}>${SECTIONS[s]||s}</option>`).join('')}</select></div>
-      <div class="form-group"><label class="label">Stock total</label><input class="input" id="ii-stock" type="number" min="0" value="${item?.stock??0}"></div>
-      <div class="form-group"><label class="label">Disponible</label><input class="input" id="ii-avail" type="number" min="0" value="${item?.available??item?.stock??0}"></div>
+      <div class="form-group"><label class="label">Codigo</label><input class="input" id="ii-code" value="${item?.codigo||''}"></div>
+      <div class="form-group"><label class="label">Equipo / Herramienta <span class="req">*</span></label><input class="input" id="ii-name" value="${item?.nombre||''}"></div>
+      <div class="form-group"><label class="label">Categoria <span class="req">*</span></label>
+        <select class="select" id="ii-sec"><option value="">-- Selecciona --</option>${catOpts}</select></div>
+      <div class="form-group"><label class="label">Cantidad</label><input class="input" id="ii-stock" type="number" min="0" value="${item?.cantidad??0}"></div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:.75rem;margin-top:1rem">
       <button class="btn btn-outline btn-sm" onclick="closeModal('modal-inv')">Cancelar</button>
@@ -1711,10 +1744,14 @@ function openInvModal(id) {
 }
 
 async function saveInv(id) {
-  const payload={code:document.getElementById('ii-code').value||null,name:document.getElementById('ii-name').value,
-    section:document.getElementById('ii-sec').value,stock:parseInt(document.getElementById('ii-stock').value)||0,
-    available:parseInt(document.getElementById('ii-avail').value)||0};
-  if(!payload.name){toast('Nombre requerido','err');return;}
+  const payload={
+    codigo:    document.getElementById('ii-code').value||null,
+    nombre:    document.getElementById('ii-name').value,
+    categoria: document.getElementById('ii-sec').value,
+    cantidad:  parseInt(document.getElementById('ii-stock').value)||0,
+  };
+  if(!payload.nombre){toast('Nombre del equipo requerido','err');return;}
+  if(!payload.categoria){toast('Selecciona una categoria','err');return;}
   if(!isSB){toast('Supabase no configurado','err');return;}
   const {error}=id?await sbClient.from('inventory').update(payload).eq('id',id):await sbClient.from('inventory').insert(payload);
   if(error){toast('Error: '+(error?.message||JSON.stringify(error)),'err');return;}
@@ -1791,45 +1828,28 @@ async function confirmUpload(type) {
 
   const CHUNK = 500; // registros por lote
   const table  = type === 'inv' ? 'inventory' : 'clients';
-  const conflict = type === 'inv' ? 'code' : 'ruc';
+  const conflict = type === 'inv' ? 'nombre' : 'ruc';
   let ok = 0, skip = 0, errCount = 0;
 
   /* ── Preparar todos los payloads primero ── */
   const payloads = [];
   for (const row of rows) {
     if (type === 'inv') {
-      const name = get(row,'descripcion del articulo','descripcion','name');
+      /* Formato simple: Categoria | Equipos y/o Herramientas | Cantidad */
+      const name = get(row,
+        'equipos y/o herramientas','herramienta','equipo','item',
+        'descripcion del articulo','descripcion','name');
       if (!name) { skip++; continue; }
-      const inactive = get(row,'inactivo','inactive').toLowerCase();
-      if (['si','sí','y','yes','true','1'].includes(inactive)) { skip++; continue; }
-      const code  = get(row,'numero de articulo','code','codigo') || null;
-      const stock = Math.max(0, Math.round(parseFloat(get(row,'en stock','stock')) || 0));
+      const catRaw = get(row,'categoria','categoría','category','seccion','section');
+      const section = resolveSection(catRaw);
+      const qty = Math.max(0, Math.round(parseFloat(
+        get(row,'cantidad','qty','quantity','stock','en stock')) || 0));
+      const code = get(row,'codigo','code','numero de articulo') || null;
       payloads.push({
-        code, name, stock, available: stock, inactive: false,
-        stock_type:    get(row,'tipo existencia'),
-        item_group:    get(row,'grupo de articulos'),
-        sale_item:     get(row,'articulo venta'),
-        container:     get(row,'envase'),
-        warehouse:     get(row,'almacen predeterminado'),
-        segment:       get(row,'segmento'),
-        family:        get(row,'familia'),
-        class:         get(row,'clase'),
-        sunat_code:    get(row,'codigo sunat'),
-        has_lot:       get(row,'lote si/no'),
-        created_date:  get(row,'fecha de creacion'),
-        purchase_uom:  get(row,'unidad de medida de compras'),
-        uom_type:      get(row,'tipo unidad de medida'),
-        last_purchase_date:  get(row,'ultima fecha de compra'),
-        last_currency:       get(row,'ultima moneda de compra'),
-        last_purchase_price: parseFloat(get(row,'ultimo precio de compra'))  || 0,
-        last_set_price:      parseFloat(get(row,'ultimo precio determinado')) || 0,
-        production_cost:     parseFloat(get(row,'costo estandar de produccion')) || 0,
-        sales_uom:     get(row,'unidad de medida de ventas'),
-        inventory_uom: get(row,'unidad de medida de inventario'),
-        product_class: get(row,'clasificacion de productos'),
-        foreign_name:  get(row,'nombre extranjero'),
-        weight:        parseFloat(get(row,'peso')) || 0,
-        icon: '', section: 'adicional',
+        codigo:    code || null,
+        nombre:    name,
+        categoria: catRaw || SECTIONS[section] || section,
+        cantidad:  qty,
       });
     } else {
       const nombre = get(row,'nombre sn','nombre','name');
@@ -1863,11 +1883,12 @@ async function confirmUpload(type) {
   for (let i = 0; i < chunks; i++) {
     const batch = payloads.slice(i * CHUNK, (i + 1) * CHUNK);
 
-    /* Separar registros con y sin clave de conflicto */
-    const withKey    = batch.filter(p => p[conflict]);
-    const withoutKey = batch.filter(p => !p[conflict]);
+    /* Para inventario: todos tienen nombre; para clientes: separar por ruc */
+    const withKey    = type === 'inv' ? batch : batch.filter(p => p[conflict]);
+    const withoutKey = type === 'inv' ? []    : batch.filter(p => !p[conflict]);
 
     if (withKey.length) {
+      // Para inventario: requiere UNIQUE en 'nombre' en Supabase
       const { error } = await sbClient
         .from(table)
         .upsert(withKey, { onConflict: conflict, ignoreDuplicates: false });
@@ -1943,13 +1964,7 @@ function hideProgress(type) {
 
 function downloadTemplate(type) {
   let headers;
-  if(type==='inv') headers=['Numero de articulo','Descripcion del articulo','En stock','Inactivo',
-    'Tipo existencia','Grupo de articulos','Articulo venta','Envase','Almacen predeterminado',
-    'Segmento','Familia','Clase','Codigo SUNAT','LOTE SI/NO','FECHA DE CREACION',
-    'Unidad de medida de compras','Tipo unidad de medida','Ultima fecha de compra',
-    'Ultima moneda de compra','Ultimo precio de compra','Ultimo precio determinado',
-    'Costo estandar de produccion','Unidad de medida de ventas','Unidad de medida de inventario',
-    'Clasificacion de Productos','Nombre extranjero','Peso'];
+  if(type==='inv') headers=['Categoria','Equipos y/o Herramientas','Cantidad'];
   else headers=['Codigo SN','Nombre SN','DIRECCION','CIUDAD','DEPARTAMENTE','Fecha de creacion',
     'CONTACTO 1','Telefono','Activo','Saldo de cuenta','Pais/Region de destinatario de factura',
     'Destinatario de mercancias: Estado','Destinatario de factura: Codigo postal'];
