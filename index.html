@@ -1128,20 +1128,27 @@ async function fetchSolicitantes() {
 }
 
 /* ─── AUTOCOMPLETE: SOLICITANTE desde tabla clients ─────────────────────── */
+/* índice temporal para lookups seguros sin romper JSON */
+let _acMatches = {};
+
 function searchSolicitante(q) {
   const dd = document.getElementById('ac-sol-nombre');
   if (!q || q.length < 2) { dd.classList.remove('open'); return; }
   const term = q.toLowerCase();
   const matches = clients.filter(c =>
     c.nombre?.toLowerCase().includes(term)
-  ).slice(0, 10);
+  ).slice(0, 12);
 
   if (!matches.length) { dd.classList.remove('open'); return; }
 
-  dd.innerHTML = matches.map(cli => {
+  /* guardar referencias por índice */
+  _acMatches = {};
+  matches.forEach((cli, i) => { _acMatches['s' + i] = cli; });
+
+  dd.innerHTML = matches.map((cli, i) => {
     const rawCod = cli.codigo_sn || cli.ruc || '';
-    const dniNum = rawCod.replace(/[^0-9]/g,'');
-    return `<div class="ac-item" onclick="selectSolicitante(${JSON.stringify(cli).replace(/"/g,'&quot;')})">
+    const dniNum = rawCod.toString().replace(/[^0-9]/g, '');
+    return `<div class="ac-item" onclick="selectSolicitante('s${i}')">
       <div class="ac-name">${cli.nombre}</div>
       <div style="display:flex;gap:.75rem">
         ${dniNum ? `<div class="ac-ruc">DNI: ${dniNum}</div>` : ''}
@@ -1152,13 +1159,13 @@ function searchSolicitante(q) {
   dd.classList.add('open');
 }
 
-function selectSolicitante(cli) {
-  document.getElementById('s1-nombre').value = cli.nombre;
+function selectSolicitante(key) {
+  const cli = _acMatches[key]; if (!cli) return;
+  document.getElementById('s1-nombre').value = cli.nombre || '';
   // DNI = solo digitos del codigo_sn (quitar letra inicial si la hay)
   const rawCodigo = cli.codigo_sn || cli.ruc || '';
   const dniNum = rawCodigo.toString().replace(/[^0-9]/g, '');
   document.getElementById('s1-dni').value = dniNum;
-  document.getElementById('s1-dni').readOnly = !!dniNum; // editable si no hay codigo
   // Limpiar errores
   ['s1-nombre','s1-dni'].forEach(id => document.getElementById(id)?.classList.remove('error'));
   ['e-nombre','e-dni'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
@@ -1172,24 +1179,29 @@ function searchConductor(q) {
   const term = q.toLowerCase();
   const matches = clients.filter(c =>
     c.nombre?.toLowerCase().includes(term)
-  ).slice(0, 10);
+  ).slice(0, 12);
 
   if (!matches.length) { dd.classList.remove('open'); return; }
 
-  dd.innerHTML = matches.map(cli => `
-    <div class="ac-item" onclick="selectConductor(${JSON.stringify(cli).replace(/"/g,'&quot;')})">
+  matches.forEach((cli, i) => { _acMatches['d' + i] = cli; });
+
+  dd.innerHTML = matches.map((cli, i) => {
+    const rawCod = cli.codigo_sn || cli.ruc || '';
+    const dniNum = rawCod.toString().replace(/[^0-9]/g, '');
+    return `<div class="ac-item" onclick="selectConductor('d${i}')">
       <div class="ac-name">${cli.nombre}</div>
       <div style="display:flex;gap:.75rem">
-        <div class="ac-ruc">SN: ${cli.codigo_sn||'—'}</div>
+        ${dniNum ? `<div class="ac-ruc">DNI: ${dniNum}</div>` : ''}
         ${cli.ciudad ? `<div class="ac-city">${cli.ciudad}</div>` : ''}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   dd.classList.add('open');
 }
 
-function selectConductor(cli) {
-  document.getElementById('s1-conductor').value = cli.nombre;
-  // Licencia la ingresa manualmente — solo limpiamos errores
+function selectConductor(key) {
+  const cli = _acMatches[key]; if (!cli) return;
+  document.getElementById('s1-conductor').value = cli.nombre || '';
   ['s1-conductor'].forEach(id => document.getElementById(id)?.classList.remove('error'));
   ['e-conductor'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   closeAllAC();
@@ -1216,24 +1228,32 @@ function searchClients(q, source='nombre') {
   if (!matches.length) {
     dd.innerHTML = `<div class="ac-empty">Sin coincidencias</div>`;
   } else {
-    dd.innerHTML = matches.map(cli => `
-      <div class="ac-item" onclick="selectClient(${JSON.stringify(cli).replace(/"/g,'&quot;')})">
-        <div class="ac-name">${cli.nombre}</div>
-        <div style="display:flex;gap:.75rem">
-          <div class="ac-ruc">RUC: ${cli.ruc||'—'}</div>
-          ${cli.ciudad ? `<div class="ac-city">${cli.ciudad}</div>` : ''}
-          ${cli.departamento ? `<div class="ac-city">· ${cli.departamento}</div>` : ''}
-        </div>
-      </div>`).join('');
+    matches.forEach((cli, i) => { _acMatches['c' + i] = cli; });
+  dd.innerHTML = matches.map((cli, i) => {
+    const rawCod = cli.codigo_sn || cli.ruc || '';
+    const rucNum = rawCod.toString().replace(/[^0-9]/g,'');
+    return `<div class="ac-item" onclick="selectClientByKey('c${i}')">
+      <div class="ac-name">${cli.nombre}</div>
+      <div style="display:flex;gap:.75rem">
+        ${rucNum ? `<div class="ac-ruc">RUC: ${rucNum}</div>` : ''}
+        ${cli.ciudad ? `<div class="ac-city">${cli.ciudad}</div>` : ''}
+        ${cli.departamento ? `<div class="ac-city">· ${cli.departamento}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
   }
   dd.classList.add('open');
 }
 
+function selectClientByKey(key) {
+  const cli = _acMatches[key]; if (!cli) return;
+  selectClient(cli);
+}
+
 function selectClient(cli) {
   selectedClient = cli;
-  // RUC = codigo_sn solo numeros (quitar letras iniciales)
-  const rucNum = (cli.codigo_sn || cli.ruc || '').replace(/[^0-9]/g, '');
-  document.getElementById('s2-busqueda').value = cli.nombre;
+  const rucNum = (cli.codigo_sn || cli.ruc || '').toString().replace(/[^0-9]/g, '');
+  document.getElementById('s2-busqueda').value = cli.nombre || '';
   document.getElementById('s2-ruc').value    = rucNum;
   document.getElementById('s2-ciudad').value = cli.ciudad||'';
   document.getElementById('s2-dir').value    = cli.direccion||'';
