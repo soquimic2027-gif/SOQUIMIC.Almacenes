@@ -485,9 +485,9 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
             <div class="field-error" id="e-nombre">Selecciona o ingresa tu nombre (min. 3 caracteres)</div>
           </div>
           <div class="form-group">
-            <label class="label">Codigo SN / DNI <span class="req">*</span></label>
+            <label class="label">DNI <span class="req">*</span></label>
             <input class="input" id="s1-dni" placeholder="Solo numeros" maxlength="12"
-                   oninput="this.value=this.value.replace(/[^0-9]/g,'')" autocomplete="off" readonly>
+                   oninput="this.value=this.value.replace(/[^0-9]/g,'')" autocomplete="off">
             <div class="field-error" id="e-dni">El codigo es requerido</div>
           </div>
           <div class="form-group">
@@ -1138,22 +1138,27 @@ function searchSolicitante(q) {
 
   if (!matches.length) { dd.classList.remove('open'); return; }
 
-  dd.innerHTML = matches.map(cli => `
-    <div class="ac-item" onclick="selectSolicitante(${JSON.stringify(cli).replace(/"/g,'&quot;')})">
+  dd.innerHTML = matches.map(cli => {
+    const rawCod = cli.codigo_sn || cli.ruc || '';
+    const dniNum = rawCod.replace(/[^0-9]/g,'');
+    return `<div class="ac-item" onclick="selectSolicitante(${JSON.stringify(cli).replace(/"/g,'&quot;')})">
       <div class="ac-name">${cli.nombre}</div>
       <div style="display:flex;gap:.75rem">
-        <div class="ac-ruc">SN: ${cli.codigo_sn||'—'}</div>
+        ${dniNum ? `<div class="ac-ruc">DNI: ${dniNum}</div>` : ''}
         ${cli.ciudad ? `<div class="ac-city">${cli.ciudad}</div>` : ''}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   dd.classList.add('open');
 }
 
 function selectSolicitante(cli) {
   document.getElementById('s1-nombre').value = cli.nombre;
-  // DNI = solo digitos del codigo_sn
-  const dniNum = (cli.codigo_sn || cli.ruc || '').replace(/[^0-9]/g, '');
+  // DNI = solo digitos del codigo_sn (quitar letra inicial si la hay)
+  const rawCodigo = cli.codigo_sn || cli.ruc || '';
+  const dniNum = rawCodigo.toString().replace(/[^0-9]/g, '');
   document.getElementById('s1-dni').value = dniNum;
+  document.getElementById('s1-dni').readOnly = !!dniNum; // editable si no hay codigo
   // Limpiar errores
   ['s1-nombre','s1-dni'].forEach(id => document.getElementById(id)?.classList.remove('error'));
   ['e-nombre','e-dni'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
