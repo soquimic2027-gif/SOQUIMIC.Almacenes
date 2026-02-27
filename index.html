@@ -1065,9 +1065,13 @@ function renderCart() {
 async function fetchClients() {
   if (!isSB) { clients = []; return; }
   try {
-    const { data, error } = await sbClient.from('clients').select('*').order('nombre');
+    const { data, error } = await sbClient
+      .from('clients')
+      .select('id,codigo_sn,ruc,nombre,direccion,ciudad,departamento,telefono,contacto,activo')
+      .order('nombre');
     if (error) { clients = []; return; }
     clients = data||[];
+    console.log('Clients loaded:', clients.length, 'Sample:', clients[0]);
   } catch(e) { clients = []; }
 }
 
@@ -1138,6 +1142,8 @@ function searchSolicitante(q) {
   const matches = clients.filter(c =>
     c.nombre?.toLowerCase().includes(term)
   ).slice(0, 12);
+  /* debug: log first match to see all available fields */
+  if (matches.length) console.log('Cliente sample fields:', Object.keys(matches[0]), matches[0]);
 
   if (!matches.length) { dd.classList.remove('open'); return; }
 
@@ -1148,7 +1154,7 @@ function searchSolicitante(q) {
   dd.innerHTML = matches.map((cli, i) => {
     const rawCod = cli.codigo_sn || cli.ruc || '';
     const dniNum = rawCod.toString().replace(/[^0-9]/g, '');
-    return `<div class="ac-item" onclick="selectSolicitante('s${i}')">
+    return `<div class="ac-item" onmousedown="selectSolicitante('s${i}')">
       <div class="ac-name">${cli.nombre}</div>
       <div style="display:flex;gap:.75rem">
         ${dniNum ? `<div class="ac-ruc">DNI: ${dniNum}</div>` : ''}
@@ -1160,13 +1166,18 @@ function searchSolicitante(q) {
 }
 
 function selectSolicitante(key) {
-  const cli = _acMatches[key]; if (!cli) return;
+  const cli = _acMatches[key];
+  console.log('selectSolicitante key:', key, 'cli:', cli);
+  if (!cli) { console.warn('cli not found for key:', key); return; }
+
   document.getElementById('s1-nombre').value = cli.nombre || '';
-  // DNI = solo digitos del codigo_sn (quitar letra inicial si la hay)
-  const rawCodigo = cli.codigo_sn || cli.ruc || '';
+
+  /* Buscar DNI en todos los campos posibles */
+  const rawCodigo = cli.codigo_sn || cli.ruc || cli.codigo || cli.code || '';
+  console.log('rawCodigo:', rawCodigo, 'all fields:', Object.keys(cli));
   const dniNum = rawCodigo.toString().replace(/[^0-9]/g, '');
   document.getElementById('s1-dni').value = dniNum;
-  // Limpiar errores
+
   ['s1-nombre','s1-dni'].forEach(id => document.getElementById(id)?.classList.remove('error'));
   ['e-nombre','e-dni'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   closeAllAC();
@@ -1188,7 +1199,7 @@ function searchConductor(q) {
   dd.innerHTML = matches.map((cli, i) => {
     const rawCod = cli.codigo_sn || cli.ruc || '';
     const dniNum = rawCod.toString().replace(/[^0-9]/g, '');
-    return `<div class="ac-item" onclick="selectConductor('d${i}')">
+    return `<div class="ac-item" onmousedown="selectConductor('d${i}')">
       <div class="ac-name">${cli.nombre}</div>
       <div style="display:flex;gap:.75rem">
         ${dniNum ? `<div class="ac-ruc">DNI: ${dniNum}</div>` : ''}
@@ -1232,7 +1243,7 @@ function searchClients(q, source='nombre') {
   dd.innerHTML = matches.map((cli, i) => {
     const rawCod = cli.codigo_sn || cli.ruc || '';
     const rucNum = rawCod.toString().replace(/[^0-9]/g,'');
-    return `<div class="ac-item" onclick="selectClientByKey('c${i}')">
+    return `<div class="ac-item" onmousedown="selectClientByKey('c${i}')">
       <div class="ac-name">${cli.nombre}</div>
       <div style="display:flex;gap:.75rem">
         ${rucNum ? `<div class="ac-ruc">RUC: ${rucNum}</div>` : ''}
