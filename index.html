@@ -1872,8 +1872,10 @@ async function confirmUpload(type) {
   if (!rows.length) { toast('Sin datos','err'); return; }
 
   const CHUNK = 500; // registros por lote
-  const table  = type === 'inv' ? 'inventory' : 'clients';
-  const conflict = type === 'inv' ? 'nombre' : 'ruc';
+  const table    = type === 'inv' ? 'inventory' : 'clients';
+  /* Para clientes: upsert por 'nombre' siempre (clave única confiable)
+     Si además tiene ruc, también se actualiza */
+  const conflict = 'nombre';
   let ok = 0, skip = 0, errCount = 0;
 
   /* ── Preparar todos los payloads primero ── */
@@ -1928,19 +1930,24 @@ async function confirmUpload(type) {
   const chunks = Math.ceil(total / CHUNK);
   showProgress(0, total, type);
 
+  /* Para clientes: borrar todo antes de insertar la nueva info */
+  if (type === 'cli') {
+    const { error: delErr } = await sbClient.from('clients').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (delErr) { noLoad(); toast('Error al limpiar tabla: ' + delErr.message, 'err'); return; }
+  }
+
   /* ── Subir en lotes ── */
   for (let i = 0; i < chunks; i++) {
     const batch = payloads.slice(i * CHUNK, (i + 1) * CHUNK);
 
-    /* Para inventario: todos tienen nombre; para clientes: separar por ruc */
-    const withKey    = type === 'inv' ? batch : batch.filter(p => p[conflict]);
-    const withoutKey = type === 'inv' ? []    : batch.filter(p => !p[conflict]);
+    /* Todos los registros tienen nombre → siempre upsert, nunca insert ciego */
+    const withKey    = batch;
+    const withoutKey = [];
 
     if (withKey.length) {
-      // Para inventario: requiere UNIQUE en 'nombre' en Supabase
       const { error } = await sbClient
         .from(table)
-        .upsert(withKey, { onConflict: conflict, ignoreDuplicates: false });
+        .insert(withKey);
       if (error) { errCount += withKey.length; console.error('Batch upsert error:', error); }
       else ok += withKey.length;
     }
