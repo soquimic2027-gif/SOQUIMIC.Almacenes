@@ -869,11 +869,15 @@ function cleanRUC(codigoSN) {
   return /^[A-Za-z]/.test(s) ? s.slice(1) : s;
 }
 
+function norm(s) {
+  return s.toString().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // quitar tildes
+    .replace(/[^a-z0-9]/g,''); // solo alfanumerico
+}
 function get(row, ...keys) {
   for (const k of keys) {
     for (const rk of Object.keys(row)) {
-      if (rk.toString().toLowerCase().replace(/[^a-z0-9]/g,'') ===
-          k.toLowerCase().replace(/[^a-z0-9]/g,'')) {
+      if (norm(rk) === norm(k)) {
         const v = row[rk];
         if (v !== null && v !== undefined && v !== '') return v.toString().trim();
       }
@@ -1142,8 +1146,7 @@ function searchSolicitante(q) {
   const matches = clients.filter(c =>
     c.nombre?.toLowerCase().includes(term)
   ).slice(0, 12);
-  /* debug: log first match to see all available fields */
-  if (matches.length) console.log('Cliente sample fields:', Object.keys(matches[0]), matches[0]);
+
 
   if (!matches.length) { dd.classList.remove('open'); return; }
 
@@ -1167,16 +1170,22 @@ function searchSolicitante(q) {
 
 function selectSolicitante(key) {
   const cli = _acMatches[key];
-  console.log('selectSolicitante key:', key, 'cli:', cli);
-  if (!cli) { console.warn('cli not found for key:', key); return; }
+  if (!cli) return;
 
   document.getElementById('s1-nombre').value = cli.nombre || '';
 
-  /* Buscar DNI en todos los campos posibles */
-  const rawCodigo = cli.codigo_sn || cli.ruc || cli.codigo || cli.code || '';
-  console.log('rawCodigo:', rawCodigo, 'all fields:', Object.keys(cli));
-  const dniNum = rawCodigo.toString().replace(/[^0-9]/g, '');
-  document.getElementById('s1-dni').value = dniNum;
+  /* Buscar DNI: codigo_sn → ruc → vacío (para edición manual) */
+  const rawCodigo = (cli.codigo_sn || cli.ruc || '').toString();
+  const dniNum = rawCodigo.replace(/[^0-9]/g, '');
+  const dniField = document.getElementById('s1-dni');
+  dniField.value = dniNum;
+
+  /* Si no hay código, enfocar campo DNI para que lo escriba */
+  if (!dniNum) {
+    dniField.focus();
+    dniField.placeholder = 'Ingresa tu DNI manualmente';
+    toast('DNI no encontrado — ingresalo manualmente', 'info');
+  }
 
   ['s1-nombre','s1-dni'].forEach(id => document.getElementById(id)?.classList.remove('error'));
   ['e-nombre','e-dni'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
@@ -1892,7 +1901,11 @@ async function confirmUpload(type) {
       if (!nombre) { skip++; continue; }
       const activo_raw = get(row,'activo','active').toLowerCase();
       const activo     = !['no','false','0'].includes(activo_raw);
-      const codigoSN   = get(row,'codigo sn','codigo','code');
+      /* Intentar todas las variantes posibles del encabezado Código SN */
+      const codigoSN = get(row,
+        'codigo sn','código sn','codigosn','codigo_sn',
+        'sn','id cliente','cliente id','codigo cliente',
+        'codigo','code','nro','numero');
       const ruc        = cleanRUC(codigoSN) || null;
       payloads.push({
         codigo_sn: codigoSN, ruc, nombre,
