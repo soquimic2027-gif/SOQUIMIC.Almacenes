@@ -1132,24 +1132,28 @@ function buildConfirmPreview() {
 /* ══════ SUBMIT VÍA RPC ══════ */
 async function getNextRequestNumber() {
   const yyyy = new Date().getFullYear();
+  const prefix = `SQM-SOL-${yyyy}-`;
   try {
     if (sbClient) {
-      // Contar solicitudes del año actual para número secuencial global
-      const prefix = `SQM-SOL-${yyyy}-`;
-      const { count, error } = await sbClient
+      // Obtener el último número del año para incrementar desde el máximo real
+      const { data, error } = await sbClient
         .from('loan_requests')
-        .select('*', { count: 'exact', head: true })
-        .like('request_number', `${prefix}%`);
+        .select('request_number')
+        .like('request_number', `${prefix}%`)
+        .order('request_number', { ascending: false })
+        .limit(1);
       if (!error) {
-        const n = (count || 0) + 1;
+        let n = 1;
+        if (data && data.length > 0) {
+          const lastNum = parseInt((data[0].request_number||'').replace(prefix,'')) || 0;
+          n = lastNum + 1;
+        }
         return `${prefix}${String(n).padStart(4,'0')}`;
       }
     }
   } catch(e) { /* fallback */ }
-  // Fallback: timestamp corto si no hay DB
-  const now = new Date();
-  const ts = String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0') + String(now.getSeconds()).padStart(2,'0');
-  return `SQM-SOL-${yyyy}-${ts}`;
+  // Fallback offline: sufijo único por timestamp
+  return `${prefix}${Date.now().toString().slice(-6)}`;
 }
 
 async function submitRequest() {
@@ -1417,13 +1421,14 @@ function renderClients() {
   const rows=q?allClients.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.codigo_sn||'').includes(q)||(c.ruc||'').includes(q)||(c.ciudad||'').toLowerCase().includes(q)):allClients;
   const tb=document.getElementById('clients-tbody');
   if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2.5rem;color:var(--c-text3)">Sin clientes</td></tr>';return;}
+  const trunc=(s,n=55)=>{if(!s||!s.trim())return'—';const t=s.trim();return t.length>n?`<span title="${t.replace(/"/g,'&quot;')}" style="cursor:help">${t.slice(0,n)}…</span>`:t;};
   tb.innerHTML=rows.slice(0,300).map(c=>`
     <tr>
-      <td><span class="mono" style="color:var(--c-orange)">${c.codigo_sn||'—'}</span></td>
-      <td>${c.nombre||'—'}</td>
-      <td>${c.ciudad||'—'}</td>
-      <td>${c.contacto||'—'}</td>
-      <td><span class="mono">${c.telefono||'—'}</span></td>
+      <td style="white-space:nowrap"><span class="mono" style="color:var(--c-orange)">${c.codigo_sn||'—'}</span></td>
+      <td style="max-width:260px">${trunc(c.nombre,55)}</td>
+      <td style="white-space:nowrap">${c.ciudad||'—'}</td>
+      <td style="max-width:160px">${trunc(c.contacto,30)}</td>
+      <td style="white-space:nowrap"><span class="mono">${c.telefono||'—'}</span></td>
     </tr>`).join('');
 }
 function filterClients(){renderClients();}
@@ -1478,7 +1483,11 @@ async function uploadExcel(type){
     for(const row of rows){
       const nombre=get(row,'nombre sn','nombre','razon social');
       if(!nombre){skip++;continue;}
+      // Ignorar filas con texto concatenado (blob de múltiples columnas)
+      if(nombre.length>150){skip++;continue;}
       const rawCod=get(row,'codigo sn','codigo');
+      // Ignorar filas sin código SN válido (filas de detalle/continuación)
+      if(!rawCod){skip++;continue;}
       payloads.push({
         codigo_sn:rawCod,ruc:rawCod.replace(/[^0-9]/g,''),nombre,
         direccion:get(row,'direccion','address'),ciudad:get(row,'ciudad'),
