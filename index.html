@@ -24,12 +24,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--c-bg);color:var(--c-text)
 /* LANDING */
 #screen-landing{background:radial-gradient(ellipse 60% 50% at 15% 50%,rgba(232,97,26,.07),transparent 65%),radial-gradient(ellipse 40% 60% at 85% 20%,rgba(232,97,26,.04),transparent 60%),var(--c-bg);align-items:center;justify-content:center;padding:2rem;gap:3rem}
 /* LANDING */
-#screen-landing{background:radial-gradient(ellipse 70% 60% at 10% 50%,rgba(232,97,26,.18),transparent 55%),radial-gradient(ellipse 50% 50% at 90% 20%,rgba(232,97,26,.05),transparent 55%),#0a0a0a;align-items:center;justify-content:center;gap:0;padding:2rem}
-.land-logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:2.8rem;width:100%}
+#screen-landing{background:radial-gradient(ellipse 70% 60% at 10% 50%,rgba(232,97,26,.18),transparent 55%),radial-gradient(ellipse 50% 50% at 90% 20%,rgba(232,97,26,.05),transparent 55%),#0a0a0a;align-items:center;justify-content:center;gap:0;padding:2rem;height:100vh;min-height:unset;overflow:hidden}
+.land-logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:1.8rem;width:100%}
 .land-logo-row{display:flex;align-items:center;justify-content:center;width:100%}
-.land-tagline{font-size:.68rem;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:1.6rem;font-weight:500}
+.land-logo-row img{width:min(55vw,520px) !important;max-height:35vh !important;height:auto !important;object-fit:contain}
+.land-tagline{font-size:.68rem;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:1rem;font-weight:500}
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;width:100%;max-width:740px}
-.role-card{position:relative;overflow:hidden;background:#111;border:1px solid #222;border-radius:16px;padding:2.2rem 1.8rem 2rem;cursor:pointer;transition:all .22s ease}
+.role-card{position:relative;overflow:hidden;background:#111;border:1px solid #222;border-radius:16px;padding:1.4rem 1.6rem 1.5rem;cursor:pointer;transition:all .22s ease}
 .role-card:hover{border-color:rgba(232,97,26,.4);transform:translateY(-2px);box-shadow:0 20px 50px rgba(0,0,0,.5)}
 .rc-arrow{position:absolute;top:1.4rem;right:1.4rem;width:30px;height:30px;border-radius:8px;background:#1e1e1e;display:flex;align-items:center;justify-content:center;color:#444;font-size:.75rem;transition:all .2s}
 .role-card:hover .rc-arrow{background:rgba(232,97,26,.12);color:var(--c-orange)}
@@ -241,7 +242,7 @@ tbody tr:hover td{background:rgba(255,255,255,.013)}
 .login-back{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:.6rem;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:8px;color:var(--c-text2);font-size:.82rem;cursor:pointer;transition:background .15s}
 .login-back:hover{background:#222}
 .app-logo{height:180px;width:auto}
-.land-logo-row img{width:80vw !important;max-width:900px !important;height:auto !important}
+
 .header-logo-text{display:none}
 
 /* PRINT */
@@ -648,8 +649,9 @@ tbody tr:hover td{background:rgba(255,255,255,.013)}
     </div>
 
     <div id="tab-clientes" style="display:none">
-      <div style="margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap">
         <input class="input" style="max-width:300px" placeholder="Buscar cliente, RUC o ciudad..." id="cli-search-adm" oninput="filterClients()">
+        <button class="btn btn-danger btn-sm" onclick="purgeCorruptClients()" title="Elimina de Supabase todas las filas con nombre vacío, sin código SN, o con texto corrupto (>150 chars)">🗑 Purgar datos corruptos</button>
       </div>
       <div class="tbl-wrap">
         <table>
@@ -835,7 +837,15 @@ async function fetchClients() {
   if (!sbClient) return;
   const { data, error } = await sbClient.from('clients').select('*').order('nombre');
   if (error) { console.warn('fetchClients error:', error.message); return; }
-  allClients = data || [];
+  // Filtrar entradas corruptas: nombre vacío, sin código SN, o texto concatenado (blob)
+  allClients = (data || []).filter(c => {
+    const nom = (c.nombre || '').trim();
+    const cod = (c.codigo_sn || '').trim();
+    if (!nom || nom.length > 150) return false;  // blob de texto
+    if (!cod) return false;                        // sin código = fila corrupta
+    if (/\d{2}\/\d{2}\/\d{4}.*\d{2}\/\d{2}\/\d{4}/.test(nom)) return false; // múltiples fechas = concatenado
+    return true;
+  });
 }
 
 /* PATRÓN CRÍTICO — _acMatches + onmousedown (no onclick) */
@@ -856,11 +866,13 @@ function closeAc(id) { setTimeout(() => { const el=document.getElementById(id); 
 function searchClients(q) {
   if (!q || q.length < 2) return [];
   const lq = q.toLowerCase();
-  return allClients.filter(c =>
-    (c.nombre||'').toLowerCase().includes(lq) ||
-    (c.codigo_sn||'').toLowerCase().includes(lq) ||
-    (c.ruc||'').toLowerCase().includes(lq)
-  ).slice(0,10);
+  return allClients.filter(c => {
+    const nom = (c.nombre||'').trim();
+    if (!nom || nom.length > 150 || !(c.codigo_sn||'').trim()) return false;
+    return nom.toLowerCase().includes(lq) ||
+      (c.codigo_sn||'').toLowerCase().includes(lq) ||
+      (c.ruc||'').toLowerCase().includes(lq);
+  }).slice(0,10);
 }
 
 function searchEmpleados(q) {
@@ -1471,6 +1483,28 @@ function renderClients() {
     </tr>`).join('');
 }
 function filterClients(){renderClients();}
+
+async function purgeCorruptClients() {
+  if(!sbClient){toast('Sin conexión a base de datos','err');return;}
+  if(!confirm('¿Eliminar de Supabase todos los clientes con datos corruptos (sin código SN o nombre mayor a 150 caracteres)?')) return;
+  load('Purgando datos corruptos...');
+  try {
+    // Obtener todos los IDs corruptos
+    const {data,error}=await sbClient.from('clients').select('id,nombre,codigo_sn');
+    if(error) throw error;
+    const badIds=(data||[]).filter(c=>{
+      const nom=(c.nombre||'').trim();
+      const cod=(c.codigo_sn||'').trim();
+      return !nom||nom.length>150||!cod;
+    }).map(c=>c.id);
+    if(!badIds.length){noLoad();toast('No se encontraron datos corruptos ✓','ok');return;}
+    const {error:delErr}=await sbClient.from('clients').delete().in('id',badIds);
+    if(delErr) throw delErr;
+    noLoad();
+    toast(`${badIds.length} registros corruptos eliminados`,'ok');
+    await fetchClients(); renderClients();
+  } catch(e){noLoad();toast('Error: '+e.message,'err');}
+}
 
 /* ══════ ADMIN TABS ══════ */
 function adminTab(tab,el){
