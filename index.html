@@ -25,8 +25,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--c-bg);color:var(--c-text)
 #screen-landing{background:radial-gradient(ellipse 60% 50% at 15% 50%,rgba(232,97,26,.07),transparent 65%),radial-gradient(ellipse 40% 60% at 85% 20%,rgba(232,97,26,.04),transparent 60%),var(--c-bg);align-items:center;justify-content:center;padding:2rem;gap:3rem}
 /* LANDING */
 #screen-landing{background:radial-gradient(ellipse 70% 60% at 10% 50%,rgba(232,97,26,.18),transparent 55%),radial-gradient(ellipse 50% 50% at 90% 20%,rgba(232,97,26,.05),transparent 55%),#0a0a0a;align-items:center;justify-content:center;gap:0;padding:2rem}
-.land-logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:2.8rem}
-.land-logo-row{display:flex;align-items:center;justify-content:center}
+.land-logo-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:2.8rem;width:100%}
+.land-logo-row{display:flex;align-items:center;justify-content:center;width:100%}
 .land-tagline{font-size:.68rem;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:1.6rem;font-weight:500}
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;width:100%;max-width:740px}
 .role-card{position:relative;overflow:hidden;background:#111;border:1px solid #222;border-radius:16px;padding:2.2rem 1.8rem 2rem;cursor:pointer;transition:all .22s ease}
@@ -234,14 +234,14 @@ tbody tr:hover td{background:rgba(255,255,255,.013)}
 #screen-login{align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse 50% 60% at 50% 40%,rgba(232,97,26,.06),transparent 65%),var(--c-bg)}
 .login-box{background:#111;border:1px solid #2a2a2a;border-radius:18px;padding:2.4rem 2.2rem 2rem;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
 .login-logo-wrap{display:flex;justify-content:center;margin-bottom:1.8rem}
-.login-logo{height:160px;width:auto}
+.login-logo{height:120px;width:auto}
 .login-title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:.1em;color:var(--c-text);text-align:center;margin-bottom:.3rem}
 .login-sub{font-size:.8rem;color:var(--c-text3);text-align:center;margin-bottom:1.8rem}
 .login-divider{border:none;border-top:1px solid #2a2a2a;margin:1.2rem 0}
 .login-back{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:.6rem;background:#1a1a1a;border:1px solid #2e2e2e;border-radius:8px;color:var(--c-text2);font-size:.82rem;cursor:pointer;transition:background .15s}
 .login-back:hover{background:#222}
-.app-logo{height:90px;width:auto}
-.land-logo-row img{height:180px;width:auto}
+.app-logo{height:180px;width:auto}
+.land-logo-row img{width:80vw !important;max-width:900px !important;height:auto !important}
 .header-logo-text{display:none}
 
 /* PRINT */
@@ -454,22 +454,21 @@ tbody tr:hover td{background:rgba(255,255,255,.013)}
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             Conductor que recoge los equipos
           </div>
+          <!-- Licencia siempre requerida (solicitante = conductor por defecto) -->
+          <div class="form-group" style="margin-top:.75rem;margin-bottom:.5rem">
+            <label class="label-upper">N° Licencia de conducir <span class="req">*</span></label>
+            <input class="input" id="s1-licencia" placeholder="Ej: Q12345678">
+          </div>
           <label class="toggle-row" onclick="toggleConductor()" style="cursor:pointer;display:flex;align-items:center;gap:.65rem">
             <input type="checkbox" id="chk-conductor" style="width:15px;height:15px;accent-color:var(--c-orange);cursor:pointer">
             <span style="font-size:.82rem;color:var(--c-text2)">El conductor es distinto al solicitante</span>
           </label>
           <div class="collapsible" id="conductor-fields">
-            <div class="g2" style="margin-top:.9rem">
-              <div class="form-group" style="margin:0">
-                <label class="label-upper">Nombre del conductor <span class="req">*</span></label>
-                <div class="ac-wrap">
-                  <input class="input" id="s1-conductor-nombre" placeholder="Buscar conductor..." autocomplete="off" oninput="acConductor(this.value)" onfocus="acConductor(this.value)" onblur="closeAc('ac-cond')">
-                  <div class="ac-dropdown" id="ac-cond"></div>
-                </div>
-              </div>
-              <div class="form-group" style="margin:0">
-                <label class="label-upper">N° Licencia de conducir</label>
-                <input class="input" id="s1-licencia" placeholder="Ej: Q12345678">
+            <div class="form-group" style="margin-top:.9rem;margin-bottom:0">
+              <label class="label-upper">Nombre del conductor <span class="req">*</span></label>
+              <div class="ac-wrap">
+                <input class="input" id="s1-conductor-nombre" placeholder="Buscar conductor..." autocomplete="off" oninput="acConductor(this.value)" onfocus="acConductor(this.value)" onblur="closeAc('ac-cond')">
+                <div class="ac-dropdown" id="ac-cond"></div>
               </div>
             </div>
           </div>
@@ -599,7 +598,7 @@ tbody tr:hover td{background:rgba(255,255,255,.013)}
           <option value="devuelto">Devuelto</option>
           <option value="rechazado">Rechazado</option>
         </select>
-        <input class="input" style="max-width:240px" placeholder="Buscar solicitante o N°..." id="f-search" oninput="loadReqs()">
+        <input class="input" style="max-width:240px" placeholder="Buscar N°, solicitante, cliente, DNI..." id="f-search" oninput="filterReqs()">
         <button class="btn btn-outline btn-sm" onclick="loadReqs()">↻ Actualizar</button>
       </div>
       <div class="tbl-wrap">
@@ -767,6 +766,7 @@ try {
 let currentUser = null;
 let allClients  = [];
 let allInv      = [];
+let allReqs     = [];
 let cart        = {};
 let currentStep = 1;
 let _acMatches  = {};
@@ -810,7 +810,7 @@ async function doLogout() {
       document.getElementById('admin-email-chip').textContent = (currentUser.email||'').split('@')[0];
     }
   } catch(e) {}
-  fetchClients(); loadInv();
+  fetchClients(); loadInv(); loadReqs();
 })();
 
 /* ══════ MODALS ══════ */
@@ -863,14 +863,43 @@ function searchClients(q) {
   ).slice(0,10);
 }
 
+function searchEmpleados(q) {
+  if (!q || q.length < 2) return [];
+  const lq = q.toLowerCase();
+  // Buscar en solicitantes de solicitudes anteriores (únicos, ordenados)
+  const seen = new Set();
+  const results = [];
+  for (const r of allReqs) {
+    const nom = (r.solicitante||'').trim();
+    if (!nom) continue;
+    const key = nom.toLowerCase();
+    if (key.includes(lq) && !seen.has(key)) {
+      seen.add(key);
+      results.push({ nombre: nom, dni: r.dni||'' });
+      if (results.length >= 8) break;
+    }
+  }
+  return results;
+}
+
 function acSolicitante(q) {
   if (!q || q.length < 2) { closeAc('ac-sol'); return; }
-  buildAcDropdown('ac-sol', searchClients(q), 'selectSolicitante');
+  const matches = searchEmpleados(q);
+  if (!matches.length) { closeAc('ac-sol'); return; }
+  // Usar buildAcDropdown con estructura compatible
+  const dd = document.getElementById('ac-sol');
+  matches.forEach((m, i) => { _acMatches['_ac-sol_' + i] = m; });
+  dd.innerHTML = matches.map((m, i) => `
+    <div class="ac-item" onmousedown="selectSolicitante('_ac-sol_${i}')">
+      <div class="ac-name">${m.nombre}</div>
+      ${m.dni ? `<div class="ac-sub">DNI: ${m.dni}</div>` : ''}
+    </div>`).join('');
+  dd.classList.add('open');
 }
 function selectSolicitante(key) {
-  const cli = _acMatches[key]; if(!cli) return;
-  document.getElementById('s1-nombre').value = cli.nombre||'';
-  document.getElementById('s1-dni').value = (cli.codigo_sn||cli.ruc||'').toString().replace(/[^0-9]/g,'');
+  const emp = _acMatches[key]; if(!emp) return;
+  document.getElementById('s1-nombre').value = emp.nombre||'';
+  if (emp.dni) document.getElementById('s1-dni').value = emp.dni;
   closeAc('ac-sol');
 }
 
@@ -1030,10 +1059,9 @@ function initForm() {
   const fr=document.getElementById('s1-fecha-retorno');
   if(fp&&!fp.value) fp.value=today;
   if(fr&&!fr.value){const d=new Date();d.setDate(d.getDate()+3);fr.value=d.toISOString().split('T')[0];}
-  // Mostrar código pendiente hasta que se envíe
-  const yyyy = new Date().getFullYear();
+  const yy2 = String(new Date().getFullYear()).slice(-2);
   const codeEl=document.getElementById('sol-code-display');
-  if(codeEl) codeEl.textContent=`SQM-SOL-${yyyy}-····`;
+  if(codeEl) codeEl.textContent=`SQM-SOL-····-${yy2}`;
 }
 
 function setStepUI(step) {
@@ -1069,6 +1097,7 @@ function validateStep(step) {
     if(!fp){toast('Ingresa la fecha de préstamo','err');return false;}
     if(!fr){toast('Ingresa la fecha de retorno','err');return false;}
     if(fr<fp){toast('La fecha de retorno debe ser posterior al préstamo','err');return false;}
+    if(!document.getElementById('s1-licencia').value.trim()){toast('Ingresa el N° de licencia de conducir','err');return false;}
     if(document.getElementById('chk-conductor').checked&&!document.getElementById('s1-conductor-nombre').value.trim()){toast('Ingresa el nombre del conductor','err');return false;}
   }
   if(step===2){
@@ -1131,11 +1160,11 @@ function buildConfirmPreview() {
 
 /* ══════ SUBMIT VÍA RPC ══════ */
 async function getNextRequestNumber() {
-  const yyyy = new Date().getFullYear();
-  const prefix = `SQM-SOL-${yyyy}-`;
+  const yy = String(new Date().getFullYear()).slice(-2);
+  const prefix = `SQM-SOL-`;
+  const pattern = `%-${yy}`;
   try {
     if (sbClient) {
-      // Obtener el último número del año para incrementar desde el máximo real
       const { data, error } = await sbClient
         .from('loan_requests')
         .select('request_number')
@@ -1145,15 +1174,15 @@ async function getNextRequestNumber() {
       if (!error) {
         let n = 1;
         if (data && data.length > 0) {
-          const lastNum = parseInt((data[0].request_number||'').replace(prefix,'')) || 0;
+          const last = data[0].request_number || '';
+          const lastNum = parseInt(last.replace(prefix,'').split('-')[0]) || 0;
           n = lastNum + 1;
         }
-        return `${prefix}${String(n).padStart(4,'0')}`;
+        return `${prefix}${String(n).padStart(4,'0')}-${yy}`;
       }
     }
   } catch(e) { /* fallback */ }
-  // Fallback offline: sufijo único por timestamp
-  return `${prefix}${Date.now().toString().slice(-6)}`;
+  return `${prefix}${Date.now().toString().slice(-6)}-${yy}`;
 }
 
 async function submitRequest() {
@@ -1280,20 +1309,30 @@ async function loadAdminData() {
 async function loadReqs() {
   if(!sbClient) return;
   const status=document.getElementById('f-status')?.value||'';
-  const search=(document.getElementById('f-search')?.value||'').toLowerCase();
   try {
     let q=sbClient.from('loan_requests').select('*').order('created_at',{ascending:false});
     if(status) q=q.eq('status',status);
-    const {data,error}=await q.limit(200);
+    const {data,error}=await q.limit(500);
     if(error) throw error;
-    let rows=data||[];
-    if(search) rows=rows.filter(r=>(r.solicitante||'').toLowerCase().includes(search)||(r.request_number||'').toLowerCase().includes(search));
-    document.getElementById('st-total').textContent=rows.length;
-    document.getElementById('st-pend').textContent=rows.filter(r=>r.status==='pendiente').length;
-    document.getElementById('st-act').textContent=rows.filter(r=>['aprobado','entregado'].includes(r.status)).length;
-    document.getElementById('st-ret').textContent=rows.filter(r=>r.status==='devuelto').length;
-    renderReqs(rows);
-  } catch(e) { console.warn('loadReqs:', e?.message || e?.error_description || JSON.stringify(e)); document.getElementById('reqs-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--c-text3)">Error cargando solicitudes</td></tr>'; }
+    allReqs = data||[];
+    filterReqs();
+  } catch(e) { console.warn('loadReqs:', e?.message||JSON.stringify(e)); document.getElementById('reqs-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--c-text3)">Error cargando solicitudes</td></tr>'; }
+}
+
+function filterReqs() {
+  const search=(document.getElementById('f-search')?.value||'').toLowerCase().trim();
+  let rows = allReqs;
+  if(search) rows=rows.filter(r=>
+    (r.solicitante||'').toLowerCase().includes(search)||
+    (r.request_number||'').toLowerCase().includes(search)||
+    (r.cliente||'').toLowerCase().includes(search)||
+    (r.dni||'').includes(search)
+  );
+  document.getElementById('st-total').textContent=allReqs.length;
+  document.getElementById('st-pend').textContent=allReqs.filter(r=>r.status==='pendiente').length;
+  document.getElementById('st-act').textContent=allReqs.filter(r=>['aprobado','entregado'].includes(r.status)).length;
+  document.getElementById('st-ret').textContent=allReqs.filter(r=>r.status==='devuelto').length;
+  renderReqs(rows);
 }
 
 const PILLS={
@@ -1418,7 +1457,7 @@ async function deleteInv(id) {
 /* ══════ CLIENTES ADMIN ══════ */
 function renderClients() {
   const q=(document.getElementById('cli-search-adm')?.value||'').toLowerCase();
-  const rows=q?allClients.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.codigo_sn||'').includes(q)||(c.ruc||'').includes(q)||(c.ciudad||'').toLowerCase().includes(q)):allClients;
+  const rows=q?allClients.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.codigo_sn||'').toLowerCase().includes(q)||(c.ruc||'').toLowerCase().includes(q)||(c.ciudad||'').toLowerCase().includes(q)):allClients;
   const tb=document.getElementById('clients-tbody');
   if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:2.5rem;color:var(--c-text3)">Sin clientes</td></tr>';return;}
   const trunc=(s,n=55)=>{if(!s||!s.trim())return'—';const t=s.trim();return t.length>n?`<span title="${t.replace(/"/g,'&quot;')}" style="cursor:help">${t.slice(0,n)}…</span>`:t;};
